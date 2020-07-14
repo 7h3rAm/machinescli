@@ -172,6 +172,13 @@ def post_http(url, data={}, headers={}):
 def strip_html(data):
   return re.sub("\s+", " ", BeautifulSoup(data, "lxml").text)
 
+def cleanup_url(url):
+  return url.replace("//", "/").replace(":/", "://")
+
+def cleanup_name(name):
+  return re.sub(r"[\W_]", "", name.lower())
+  return name.lower().replace(" ", "").replace(":", "").replace("_", "").replace("-", "")
+
 def yturl2verboseid(url):
   v, t = None, None
   for param in url.strip().split("?", 1)[1].split("&"):
