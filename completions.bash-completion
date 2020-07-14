@@ -1,0 +1,3 @@
+#/usr/bin/env bash
+
+complete -W "-h --help -j --jsonify --update --counts '--query all' '--query htb' '--query vh' '--query owned' '--query ownedhtb' '--query oscplikehtb' '--query oscplikevh' '--query ownedoscplike' '--query ownednotoscplike' '--query ownedoscplikehtb' '--query ownedoscplikevh' '--info <name|url|id>' '--search <writeup|description>' '--own <name|url|id>,flag' '--htb-assign <name|url|id>' --htb-assigned --htb-expiry '--htb-extend <name|url|id>' '--htb-remove <name|url|id>' '--htb-reset <name|url|id>' --htb-resetting --htb-spawned --htb-stats --htb-terminating '--htb-todo <name|url|id>' --htb-todos" machinescli
