@@ -1,6 +1,6 @@
 # machinescli
 
-[![License: CC BY 4.0](ccby4.svg)](https://creativecommons.org/licenses/by/4.0/)
+[![License: CC BY 4.0](https://raw.githubusercontent.com/7h3rAm/7h3rAm.github.io/master/static/files/ccby4.svg)](https://creativecommons.org/licenses/by/4.0/)
 
 This tool provides commandline access for HackTheBox and VulnHub machines. It can be useful for looking up machine details, interacting with HackTheBox portal, tracking owned/pending machines, etc. It also provides commandline based, [ippsec.rocks](https://ippsec.rocks/?#) like search facility for writeup descriptions and extends it to VulnHub machines as well. It works in conjuction with [svachal](https://github.com/7h3rAm/svachal) framework so all machine writeups metadata is natively accessible:
 
