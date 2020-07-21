@@ -21,10 +21,10 @@ class MachinesCLI:
 
     self.basedir = os.path.dirname(os.path.realpath(__file__))
 
-    self.ownedfile = "%s/.owned" % (utils.expand_env(var="$HOME"))
+    self.ownedfile = "%s/toolbox/bootstrap/owned" % (utils.expand_env(var="$HOME"))
     self.ownedlist = utils.load_file(self.ownedfile)
 
-    self.statsfile = "%s/.machines.json" % (utils.expand_env(var="$HOME"))
+    self.statsfile = "%s/toolbox/bootstrap/machines.json" % (utils.expand_env(var="$HOME"))
     self.stats = utils.load_json(self.statsfile)
 
     self.queries = {
