@@ -321,15 +321,15 @@ def show_machines(data, sort_key="name", jsonify=False, gsheet=False):
         mid = "%s%s" % (blue("%s#" % (entry["verbose_id"].split("#")[0])), blue_bold("%s" % (entry["verbose_id"].split("#")[1])))
         name = black_bold(entry["name"])
         os = to_emoji(entry["os"])
-        difficulty = to_emoji(entry["difficulty"]) if entry.get("difficulty") and entry["difficulty"] else to_emoji("difficulty_unknown")
+        difficulty = entry["difficulty"] if entry.get("difficulty") and entry["difficulty"] else "difficulty_unknown"
         rating = to_color_difficulty(sparkify(entry["difficulty_ratings"])) if entry.get("difficulty_ratings") else ""
         if entry.get("owned_root") and entry["owned_root"]:
-          owned = to_emoji("access_root")
+          owned = "access_root"
         elif entry.get("owned_user") and entry["owned_user"]:
-          owned = to_emoji("access_user")
+          owned = "access_user"
         else:
-          owned = to_emoji("access_none")
-        oscplike = to_emoji("oscplike") if entry["oscplike"] else to_emoji("notoscplike")
+          owned = "access_none"
+        oscplike = "oscplike" if entry["oscplike"] else "notoscplike"
         private = to_emoji("private") if entry["private"] else to_emoji("public")
         rows.append("%s.___%s___%s___%s___%s___%s___%s___%s___%s" % (
         idx+1,
@@ -338,13 +338,13 @@ def show_machines(data, sort_key="name", jsonify=False, gsheet=False):
         private,
         os,
         rating,
-        difficulty,
-        owned,
-        oscplike,
+        to_emoji(difficulty),
+        to_emoji(owned),
+        to_emoji(oscplike),
       ))
 
     elif "expires_at" in data[0]:
-      header = ["#", "ID", "Name", "Expires", "OS", "Difficulty", "Rating", "Owned", "OSCPlike"]
+      header = ["#", "ID", "Name", "Expires", "OS", "Rating", "Difficulty", "Owned", "OSCPlike"]
       for idx, entry in enumerate(sorted(data, key=lambda k: k[sort_key].lower())):
         mid = "%s%s" % (blue("%s#" % (entry["verbose_id"].split("#")[0])), blue_bold("%s" % (entry["verbose_id"].split("#")[1])))
         name = black_bold(entry["name"])
@@ -357,15 +357,15 @@ def show_machines(data, sort_key="name", jsonify=False, gsheet=False):
           owned = "access_user"
         else:
           owned = "access_none"
-        oscplike = to_emoji("oscplike") if entry["oscplike"] else to_emoji("notoscplike")
+        oscplike = "oscplike" if entry["oscplike"] else "notoscplike"
         rows.append("%s.___%s___%s___%s___%s___%s___%s___%s___%s" % (
         idx+1,
         mid,
         name,
         entry["expires_at"],
         os,
-        to_emoji(difficulty),
         rating,
+        to_emoji(difficulty),
         to_emoji(owned),
         to_emoji(oscplike),
       ))
@@ -378,15 +378,15 @@ def show_machines(data, sort_key="name", jsonify=False, gsheet=False):
         match = trim(entry["search_text"].replace(" - ", " ").strip(), maxq=30) if entry.get("search_text") else ""
         follow = blue(entry["search_url"])
         os = to_emoji(entry["os"])
-        difficulty = to_emoji(entry["difficulty"]) if entry.get("difficulty") and entry["difficulty"] else to_emoji("difficulty_unknown")
+        difficulty = entry["difficulty"] if entry.get("difficulty") and entry["difficulty"] else "difficulty_unknown"
         rating = to_color_difficulty(sparkify(entry["difficulty_ratings"])) if entry.get("difficulty_ratings") else ""
         if entry.get("owned_root") and entry["owned_root"]:
-          owned = to_emoji("access_root")
+          owned = "access_root"
         elif entry.get("owned_user") and entry["owned_user"]:
-          owned = to_emoji("access_user")
+          owned = "access_user"
         else:
-          owned = to_emoji("access_none")
-        oscplike = to_emoji("oscplike") if entry["oscplike"] else to_emoji("notoscplike")
+          owned = "access_none"
+        oscplike = "oscplike" if entry["oscplike"] else "notoscplike"
         rows.append("%s.___%s___%s___%s___%s___%s___%s___%s___%s___%s" % (
         idx+1,
         mid,
@@ -395,9 +395,9 @@ def show_machines(data, sort_key="name", jsonify=False, gsheet=False):
         follow,
         os,
         rating,
-        difficulty,
-        owned,
-        oscplike,
+        to_emoji(difficulty),
+        to_emoji(owned),
+        to_emoji(oscplike),
       ))
 
     else:
@@ -406,24 +406,24 @@ def show_machines(data, sort_key="name", jsonify=False, gsheet=False):
         mid = "%s%s" % (blue("%s#" % (entry["verbose_id"].split("#")[0])), blue_bold("%s" % (entry["verbose_id"].split("#")[1])))
         name = black_bold(entry["name"])
         os = to_emoji(entry["os"])
-        difficulty = to_emoji(entry["difficulty"]) if entry.get("difficulty") and entry["difficulty"] else to_emoji("difficulty_unknown")
+        difficulty = entry["difficulty"] if entry.get("difficulty") and entry["difficulty"] else "difficulty_unknown"
         rating = to_color_difficulty(sparkify(entry["difficulty_ratings"])) if entry.get("difficulty_ratings") else ""
         if entry.get("owned_root") and entry["owned_root"]:
-          owned = to_emoji("access_root")
+          owned = "access_root"
         elif entry.get("owned_user") and entry["owned_user"]:
-          owned = to_emoji("access_user")
+          owned = "access_user"
         else:
-          owned = to_emoji("access_none")
-        oscplike = to_emoji("oscplike") if entry["oscplike"] else to_emoji("notoscplike")
+          owned = "access_none"
+        oscplike = "oscplike" if entry["oscplike"] else "notoscplike"
         rows.append("%s.___%s___%s___%s___%s___%s___%s___%s" % (
         idx+1,
         mid,
         name,
         os,
         rating,
-        difficulty,
-        owned,
-        oscplike,
+        to_emoji(difficulty),
+        to_emoji(owned),
+        to_emoji(oscplike),
       ))
 
     to_table(header=header, rows=rows, delim="___", aligndict=None, markdown=False)

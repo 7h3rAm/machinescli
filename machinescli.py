@@ -654,7 +654,7 @@ class MachinesCLI:
         if entry["id"] == machine["id"]:
           machine["expires_at"] = entry["expires_at"]
           results.append(machine)
-    utils.show_machines(machines, jsonify=self.jsonify, gsheet=self.gsheet)
+    utils.show_machines(results, jsonify=self.jsonify, gsheet=self.gsheet)
 
   def htb_assign(self, searchkey):
     matches = self._filter_machines([searchkey], infrastructure="htb")
