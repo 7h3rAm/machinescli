@@ -317,34 +317,18 @@ class MachinesCLI:
   def _refresh_htb_owned(self):
     # get owned list from htb api
     owned = self._filter_machines([x["id"] for x in self.htbapi.machines_owns()], infrastructure="htb")
-    ## iterate over local owned machines list and remove all htb entries
-    #for line in utils.load_file(self.ownedfile):
-    #  if "hackthebox.eu" in line and line in self.ownedlist:
-    #    self.ownedlist.remove(line)
-
-
-
-
     # add all owned htb machines to in-memory owned list
     self.ownedlist.extend([x["url"] for x in owned])
-
-    self.ownedlist = list(set(self.ownedlist))
-
+    # dedup ownedlist
+    self.ownedlist = sorted(list(set(self.ownedlist)))
     # save the updated owned list locally and refreh in-memory list
     self._save_owned()
-    self._reload_owned()
-
     return owned
 
   def _update_hackthebox(self, stats):
     utils.info("updating hackthebox machines...")
-    # use this opportunity to refresh htb results within owned machines list
+    # use this opportunity to refresh htb results for owned machines
     owned = self._refresh_htb_owned()
-
-    print(self.ownedlist)
-
-    # get owned list from htb api
-    #owned = self._filter_machines([x["id"] for x in self.htbapi.machines_owns()], infrastructure="htb")
     difficulty = self.htbapi.machines_difficulty()
     for machine in self.htbapi.machines_get_all():
       matchdict = machine
@@ -359,7 +343,7 @@ class MachinesCLI:
       matchdict["owned_user"], matchdict["owned_root"] = False, False
       for entry in owned:
         if entry["id"] == matchdict["id"]:
-          matchdict["owned_user"], matchdict["owned_root"] = entry["owned_user"], entry["owned_root"]
+          matchdict["owned_user"], matchdict["owned_root"] = True, True
           break
       matchdict["difficulty_ratings"] = None
       for entry in difficulty:
@@ -408,7 +392,6 @@ class MachinesCLI:
           stats["counts"]["ownedhtbnix"] += 1
           stats["counts"]["ownednix"] += 1
       stats["machines"].append(matchdict)
-      print(matchdict["name"], matchdict["owned_user"], matchdict["owned_root"])
     utils.info("found %d hackthebox machines" % (stats["counts"]["totalhtb"]))
     return stats
 
@@ -525,12 +508,11 @@ class MachinesCLI:
     }
 
     # useful metadata sources
-    #self._update_ippsec()
-    #self._update_oscplike()
+    self._update_ippsec()
+    self._update_oscplike()
 
     # infrastructure/platform sources
     stats = self._update_hackthebox(stats)
-    return
     stats = self._update_vulnhub(stats)
 
     stats["counts"]["perhtb"] = (stats["counts"]["ownedhtb"]/stats["counts"]["totalhtb"])*100
