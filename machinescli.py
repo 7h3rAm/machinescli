@@ -614,11 +614,11 @@ class MachinesCLI:
       utils.error("found multiple (%d) machines for searchkey \"%s\"" % (len(matches), searchkey))
     else:
       for entry in matches:
-        if entry["url"] not in self.ownedlist:
-          #self.ownedlist.append(entry["url"])
-          if entry["infrastructure"] in ["htb", "hackthebox"]:
-            resp = self.htbapi.machines_own(flag, entry["points"], entry["id"])
-            utils.to_json(resp)
+        self.ownedlist.append(entry["url"])
+        self._save_owned()
+        if entry["infrastructure"] in ["htb", "hackthebox"]:
+          resp = self.htbapi.machines_own(flag, entry["points"], entry["id"])
+          utils.to_json(resp)
 
   def htb_stats(self):
     stats = {
