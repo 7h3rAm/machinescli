@@ -159,7 +159,10 @@ class MachinesCLI:
     return results
 
   def json_query(self, query):
-    return jq.compile(query).input(self.stats).all()
+    try:
+      return jq.compile(query).input(self.stats).all()
+    except:
+      return []
 
   def _update_ippsec(self):
     utils.info("updating ippsec writeup descriptions...")
@@ -314,22 +317,34 @@ class MachinesCLI:
   def _refresh_htb_owned(self):
     # get owned list from htb api
     owned = self._filter_machines([x["id"] for x in self.htbapi.machines_owns()], infrastructure="htb")
-    # iterate over local owned machines list and remove all htb entries
-    for line in utils.load_file(self.ownedfile):
-      if "hackthebox.eu" in line and line in self.ownedlist:
-        self.ownedlist.remove(line)
+    ## iterate over local owned machines list and remove all htb entries
+    #for line in utils.load_file(self.ownedfile):
+    #  if "hackthebox.eu" in line and line in self.ownedlist:
+    #    self.ownedlist.remove(line)
+
+
+
+
     # add all owned htb machines to in-memory owned list
     self.ownedlist.extend([x["url"] for x in owned])
+
+    self.ownedlist = list(set(self.ownedlist))
+
     # save the updated owned list locally and refreh in-memory list
     self._save_owned()
     self._reload_owned()
 
+    return owned
+
   def _update_hackthebox(self, stats):
     utils.info("updating hackthebox machines...")
     # use this opportunity to refresh htb results within owned machines list
-    self._refresh_htb_owned()
+    owned = self._refresh_htb_owned()
+
+    print(self.ownedlist)
+
     # get owned list from htb api
-    owned = self._filter_machines([x["id"] for x in self.htbapi.machines_owns()], infrastructure="htb")
+    #owned = self._filter_machines([x["id"] for x in self.htbapi.machines_owns()], infrastructure="htb")
     difficulty = self.htbapi.machines_difficulty()
     for machine in self.htbapi.machines_get_all():
       matchdict = machine
@@ -393,6 +408,7 @@ class MachinesCLI:
           stats["counts"]["ownedhtbnix"] += 1
           stats["counts"]["ownednix"] += 1
       stats["machines"].append(matchdict)
+      print(matchdict["name"], matchdict["owned_user"], matchdict["owned_root"])
     utils.info("found %d hackthebox machines" % (stats["counts"]["totalhtb"]))
     return stats
 
@@ -509,11 +525,12 @@ class MachinesCLI:
     }
 
     # useful metadata sources
-    self._update_ippsec()
-    self._update_oscplike()
+    #self._update_ippsec()
+    #self._update_oscplike()
 
     # infrastructure/platform sources
     stats = self._update_hackthebox(stats)
+    return
     stats = self._update_vulnhub(stats)
 
     stats["counts"]["perhtb"] = (stats["counts"]["ownedhtb"]/stats["counts"]["totalhtb"])*100
@@ -616,11 +633,10 @@ class MachinesCLI:
     else:
       for entry in matches:
         if entry["url"] not in self.ownedlist:
-          self.ownedlist.append(entry["url"])
+          #self.ownedlist.append(entry["url"])
           if entry["infrastructure"] in ["htb", "hackthebox"]:
-            self.htbapi.machines_own(flag, entry["points"], entry["id"])
-      utils.show_machines(matches)
-      self._refresh_htb_owned()
+            resp = self.htbapi.machines_own(flag, entry["points"], entry["id"])
+            utils.to_json(resp)
 
   def htb_stats(self):
     stats = {
@@ -635,6 +651,9 @@ class MachinesCLI:
 
   def htb_assigned(self):
     utils.show_machines(self._filter_machines([x["id"] for x in self.htbapi.machines_assigned()], infrastructure="htb"), jsonify=self.jsonify, gsheet=self.gsheet)
+
+  def htb_owned(self):
+    utils.show_machines(self._filter_machines([x["id"] for x in self.htbapi.machines_owns()], infrastructure="htb"), jsonify=self.jsonify, gsheet=self.gsheet)
 
   def htb_spawned(self):
     utils.show_machines(self._filter_machines([x["id"] for x in self.htbapi.machines_spawned()], infrastructure="htb"), jsonify=self.jsonify, gsheet=self.gsheet)
@@ -721,6 +740,7 @@ if __name__ == "__main__":
   htbgroup = mcgroup.add_mutually_exclusive_group()
   htbgroup.add_argument('--htb-assign', required=False, action='store', help='assign a hackthebox machine name|url|id')
   htbgroup.add_argument('--htb-assigned', required=False, action='store_true', default=False, help='show hackthebox assigned machines')
+  htbgroup.add_argument('--htb-owned', required=False, action='store_true', default=False, help='show hackthebox owned machines')
   htbgroup.add_argument('--htb-expiry', required=False, action='store_true', default=False, help='show expiry details for hackthebox machines')
   htbgroup.add_argument('--htb-extend', required=False, action='store', help='extend a hackthebox machine name|url|id')
   htbgroup.add_argument('--htb-remove', required=False, action='store', help='remove a hackthebox machine name|url|id')
@@ -768,6 +788,9 @@ if __name__ == "__main__":
 
   elif args.htb_assigned:
     mcli.htb_assigned()
+
+  elif args.htb_owned:
+    mcli.htb_owned()
 
   elif args.htb_spawned:
     mcli.htb_spawned()
