@@ -216,6 +216,7 @@ class MachinesCLI:
 
     # get listing of oscplike vulnhub machines
     self.olsearchkeys["vh"] = []
+    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/photographer-1,519/"]
     # https://www.abatchy.com/2017/02/oscp-like-vulnhub-vms
     self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/devrandom-scream,47/"]
     self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/brainpan-1,51/"]
