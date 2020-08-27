@@ -620,6 +620,7 @@ class MachinesCLI:
         if entry["infrastructure"] in ["htb", "hackthebox"]:
           resp = self.htbapi.machines_own(flag, entry["points"], entry["id"])
           utils.to_json(resp)
+      # based on api reponse, update machines.json
 
   def htb_stats(self):
     stats = {
