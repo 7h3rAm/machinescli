@@ -516,25 +516,25 @@ class MachinesCLI:
     stats = self._update_hackthebox(stats)
     stats = self._update_vulnhub(stats)
 
-    stats["counts"]["perhtb"] = (stats["counts"]["ownedhtb"]/stats["counts"]["totalhtb"])*100
-    stats["counts"]["perhtbnix"] = (stats["counts"]["ownedhtbnix"]/stats["counts"]["htbnix"])*100
-    stats["counts"]["perhtbwindows"] = (stats["counts"]["ownedhtbwindows"]/stats["counts"]["htbwindows"])*100
-    stats["counts"]["perhtboscplike"] = (stats["counts"]["ownedhtboscplike"]/stats["counts"]["htboscplike"])*100
+    stats["counts"]["perhtb"] = (stats["counts"]["ownedhtb"]/stats["counts"]["totalhtb"])*100 if stats["counts"]["totalhtb"] else 0
+    stats["counts"]["perhtbnix"] = (stats["counts"]["ownedhtbnix"]/stats["counts"]["htbnix"])*100 if stats["counts"]["htbnix"] else 0
+    stats["counts"]["perhtbwindows"] = (stats["counts"]["ownedhtbwindows"]/stats["counts"]["htbwindows"])*100 if stats["counts"]["htbwindows"] else 0
+    stats["counts"]["perhtboscplike"] = (stats["counts"]["ownedhtboscplike"]/stats["counts"]["htboscplike"])*100 if stats["counts"]["htboscplike"] else 0
 
     utils.to_json(stats["counts"])
 
-    stats["counts"]["pervh"] = (stats["counts"]["ownedvh"]/stats["counts"]["totalvh"])*100
-    stats["counts"]["pervhnix"] = (stats["counts"]["ownedvhnix"]/stats["counts"]["vhnix"])*100
-    stats["counts"]["pervhwindows"] = (stats["counts"]["ownedvhwindows"]/stats["counts"]["vhwindows"])*100
-    stats["counts"]["pervhoscplike"] = (stats["counts"]["ownedvhoscplike"]/stats["counts"]["vhoscplike"])*100
+    stats["counts"]["pervh"] = (stats["counts"]["ownedvh"]/stats["counts"]["totalvh"])*100 if stats["counts"]["totalvh"] else 0
+    stats["counts"]["pervhnix"] = (stats["counts"]["ownedvhnix"]/stats["counts"]["vhnix"])*100 if stats["counts"]["vhnix"] else 0
+    stats["counts"]["pervhwindows"] = (stats["counts"]["ownedvhwindows"]/stats["counts"]["vhwindows"])*100 if stats["counts"]["vhwindows"] else 0
+    stats["counts"]["pervhoscplike"] = (stats["counts"]["ownedvhoscplike"]/stats["counts"]["vhoscplike"])*100 if stats["counts"]["vhoscplike"] else 0
 
-    stats["counts"]["peroscplike"] = (stats["counts"]["ownedoscplike"]/stats["counts"]["totaloscplike"])*100
-    stats["counts"]["peroscplikenix"] = (stats["counts"]["ownedoscplikenix"]/stats["counts"]["oscplikenix"])*100
-    stats["counts"]["peroscplikewindows"] = (stats["counts"]["ownedoscplikewindows"]/stats["counts"]["oscplikewindows"])*100
+    stats["counts"]["peroscplike"] = (stats["counts"]["ownedoscplike"]/stats["counts"]["totaloscplike"])*100 if stats["counts"]["totaloscplike"] else 0
+    stats["counts"]["peroscplikenix"] = (stats["counts"]["ownedoscplikenix"]/stats["counts"]["oscplikenix"])*100 if stats["counts"]["oscplikenix"] else 0
+    stats["counts"]["peroscplikewindows"] = (stats["counts"]["ownedoscplikewindows"]/stats["counts"]["oscplikewindows"])*100 if stats["counts"]["oscplikewindows"] else 0
 
-    stats["counts"]["pernix"] = (stats["counts"]["ownednix"]/stats["counts"]["totalnix"])*100
-    stats["counts"]["perwindows"] = (stats["counts"]["ownedwindows"]/stats["counts"]["totalwindows"])*100
-    stats["counts"]["pertotal"] = (stats["counts"]["ownedtotal"]/stats["counts"]["totaltotal"])*100
+    stats["counts"]["pernix"] = (stats["counts"]["ownednix"]/stats["counts"]["totalnix"])*100 if stats["counts"]["totalnix"] else 0
+    stats["counts"]["perwindows"] = (stats["counts"]["ownedwindows"]/stats["counts"]["totalwindows"])*100 if stats["counts"]["totalwindows"] else 0
+    stats["counts"]["pertotal"] = (stats["counts"]["ownedtotal"]/stats["counts"]["totaltotal"])*100 if stats["counts"]["totaltotal"] else 0
 
     self.stats = stats
     self._save_stats()

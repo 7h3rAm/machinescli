@@ -317,7 +317,7 @@ class VulnHub:
     page = res.text
 
     soup = BeautifulSoup(page, 'lxml')
-    container = soup.find('div', id="description", class_="accordion-body collapse in")
+    container = soup.find('div', id="description", class_="panel")
     machinestats["description"] = "\n".join([para.text for para in container.find_all('p', recursive=True)]).strip()
 
     # <li><b>Name</b>: Seppuku: 1</li>
