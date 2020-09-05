@@ -262,27 +262,17 @@ class VulnHub:
     }
 
   def _get_all_machine_urls(self):
-    # from baseurl, get urls page urls
-    res = utils.get_http_res(self.baseurl)
-    if res.status_code == 200 and res.text:
-      pages = re.findall(r'page=\d+', res.text)
-      if pages:
-        pagecount = len(sorted(list(set(pages))))
-        utils.debug("found %d machine listing pages on VulnHub" % (pagecount))
-        pageurls = ["https://www.vulnhub.com/?page=%d" % (x+1) for x in range(pagecount)]
-
-    # from page urls, get machine urls
+    # from timeline url, get machine urls
     machineurls = []
-    for idx, pageurl in enumerate(pageurls):
-      res = utils.get_http_res(pageurl)
-      if res.status_code == 200 and res.text:
-        page = res.text
-        entries = re.findall(r'<a href="/entry/(.+),(\d+)/" ', page)
-        if entries:
-          machineurls.extend(["https://www.vulnhub.com/entry/%s,%s/" % (x[0], x[1]) for x in entries])
-    if len(machineurls):
-      utils.debug("from %d pages, found %d machines on VulnHub" % (len(pageurls), len(machineurls)))
-      return machineurls
+    res = utils.get_http_res("%s/timeline/" % self.baseurl)
+    if res.status_code == 200 and res.text:
+      pages = re.findall(r'<a href="/entry/[^"]+', res.text)
+      if pages:
+        machineurls = ["%s%s" % (self.baseurl, x.split('"', 2)[1].replace("/entry/", "entry/")) for x in pages]
+      if len(machineurls):
+        utils.debug("found %d machines on VulnHub" % (len(machineurls)))
+
+    return machineurls
 
   def _parse_machine_page(self, url):
     if not url:
