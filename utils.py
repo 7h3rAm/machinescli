@@ -16,6 +16,8 @@ def highlight(text, color="black", bold=False):
   color = color.lower().strip()
   if color == "black":
     colorcode = "\x1b[0;30m" if not bold else "\x1b[1;30m"
+  elif color == "white":
+    colorcode = "\x1b[0;37m" if not bold else "\x1b[1;37m"
   elif color == "red":
     colorcode = "\x1b[0;31m" if not bold else "\x1b[1;31m"
   elif color == "green":
@@ -37,6 +39,12 @@ def black(text):
 
 def black_bold(text):
   return highlight(text, color="black", bold=True)
+
+def white(text):
+  return highlight(text, color="white", bold=False)
+
+def white_bold(text):
+  return highlight(text, color="white", bold=True)
 
 def red(text):
   return highlight(text, color="red", bold=False)
@@ -203,33 +211,43 @@ def to_emoji(text):
   text = str(text)
   # https://github.com/ikatyang/emoji-cheat-sheet
   if "private" == text.lower():
-    return "🔒"
+    return red("")
   elif "public" == text.lower():
-    return "🔑" # 🔓
+    return green("")
   elif "oscplike" == text.lower():
-    return "⚠️"
+    return magenta("")
   elif "access_root" == text.lower():
-    return "🩸"
+    return red("")
   elif "access_user" == text.lower():
-    return "💧"
-  elif "linux" == text.lower():
-    return "🐧"
+    return yellow("")
+  elif "android" in text.lower():
+    return green("")
+  elif "arm" in text.lower():
+    return magenta("")
   elif "bsd" in text.lower():
-    return "👹"
+    return red("")
+  elif "linux" == text.lower():
+    return yellow_bold("")
+  elif "solaris" in text.lower():
+    return magenta_bold("")
+  elif "unix" in text.lower():
+    return magenta("")
   elif "windows" == text.lower():
-    return "🔷"
+    return blue("")
+  elif "other" in text.lower():
+    return magenta("")
   elif "difficulty_unknown" == text.lower():
-    return "⚪"
+    return ""
   elif "easy" == text.lower():
-    return "🟢"
+    return cyan_bold("")
   elif "medium" == text.lower():
-    return "🟡"
+    return green_bold("")
   elif "hard" == text.lower():
-    return "🟠"
+    return yellow_bold("")
   elif "insane" == text.lower():
-    return "🔴"
+    return red_bold("")
   else:
-    return "⚪"
+    return ""
 
 def to_markdown_table(pt):
   _junc = pt.junction_char
@@ -268,11 +286,11 @@ def get_table(header, rows, delim="___", aligndict=None, markdown=False, colalig
       table.align["Match"] = "l"
       table.align["Follow"] = "l"
       table.align["Private"] = "c"
-      table.align["OS"] = "c"
-      table.align["Rating"] = "l"
+      table.align["Rating"] = "c"
       table.align["Difficulty"] = "c"
-      table.align["Owned"] = "l"
-      table.align["OSCPlike"] = "l"
+      table.align["OS"] = "c"
+      table.align["OSCPlike"] = "c"
+      table.align["Owned"] = "c"
     table.vertical_char = " "
     table.horizontal_char = "-"
     table.junction_char = " "
@@ -316,7 +334,7 @@ def show_machines(data, sort_key="name", jsonify=False, gsheet=False):
   else:
     rows = []
     if "writeuppdfurl" in data[0]:
-      header = ["#", "ID", "Name", "Private", "OS", "Rating", "Difficulty", "Owned", "OSCPlike"]
+      header = ["#", "ID", "Name", "Private", "Rating", "Difficulty", "OS", "OSCPlike", "Owned"]
       for idx, entry in enumerate(sorted(data, key=lambda k: k[sort_key].lower())):
         mid = "%s%s" % (blue("%s#" % (entry["verbose_id"].split("#")[0])), blue_bold("%s" % (entry["verbose_id"].split("#")[1])))
         name = black_bold(entry["name"])
@@ -336,15 +354,15 @@ def show_machines(data, sort_key="name", jsonify=False, gsheet=False):
         mid,
         name,
         private,
-        os,
         rating,
         to_emoji(difficulty),
-        to_emoji(owned),
+        os,
         to_emoji(oscplike),
+        to_emoji(owned),
       ))
 
     elif "expires_at" in data[0]:
-      header = ["#", "ID", "Name", "Expires", "OS", "Rating", "Difficulty", "Owned", "OSCPlike"]
+      header = ["#", "ID", "Name", "Expires", "Rating", "Difficulty", "OS", "OSCPlike", "Owned"]
       for idx, entry in enumerate(sorted(data, key=lambda k: k[sort_key].lower())):
         mid = "%s%s" % (blue("%s#" % (entry["verbose_id"].split("#")[0])), blue_bold("%s" % (entry["verbose_id"].split("#")[1])))
         name = black_bold(entry["name"])
@@ -363,20 +381,25 @@ def show_machines(data, sort_key="name", jsonify=False, gsheet=False):
         mid,
         name,
         entry["expires_at"],
-        os,
         rating,
         to_emoji(difficulty),
-        to_emoji(owned),
+        os,
         to_emoji(oscplike),
+        to_emoji(owned),
       ))
 
     elif "search_url" in data[0]:
-      header = ["#", "ID", "Name", "Match", "Follow", "OS", "Rating", "Difficulty", "Owned", "OSCPlike"]
+      header = ["#", "ID", "Name", "Match", "Follow", "Rating", "Difficulty", "OS", "OSCPlike", "Owned"]
       for idx, entry in enumerate(sorted(data, key=lambda k: k[sort_key].lower())):
         mid = "%s%s" % (blue("%s#" % (entry["verbose_id"].split("#")[0])), blue_bold("%s" % (entry["verbose_id"].split("#")[1])))
         name = black_bold(entry["name"])
         match = trim(entry["search_text"].replace(" - ", " ").strip(), maxq=30) if entry.get("search_text") else ""
-        follow = blue(entry["search_url"])
+
+        if entry["search_url"].startswith("youtu.be/"):
+          follow = "%s %s" % (red(""), blue(entry["search_url"]))
+        else:
+          follow = blue(entry["search_url"])
+
         os = to_emoji(entry["os"])
         difficulty = entry["difficulty"] if entry.get("difficulty") and entry["difficulty"] else "difficulty_unknown"
         rating = to_color_difficulty(sparkify(entry["difficulty_ratings"])) if entry.get("difficulty_ratings") else ""
@@ -393,15 +416,15 @@ def show_machines(data, sort_key="name", jsonify=False, gsheet=False):
         name,
         match,
         follow,
-        os,
         rating,
         to_emoji(difficulty),
-        to_emoji(owned),
+        os,
         to_emoji(oscplike),
+        to_emoji(owned),
       ))
 
     else:
-      header = ["#", "ID", "Name", "OS", "Rating", "Difficulty", "Owned", "OSCPlike"]
+      header = ["#", "ID", "Name", "Rating", "Difficulty", "OS", "OSCPlike", "Owned"]
       for idx, entry in enumerate(sorted(data, key=lambda k: k[sort_key].lower())):
         mid = "%s%s" % (blue("%s#" % (entry["verbose_id"].split("#")[0])), blue_bold("%s" % (entry["verbose_id"].split("#")[1])))
         name = black_bold(entry["name"])
@@ -419,11 +442,11 @@ def show_machines(data, sort_key="name", jsonify=False, gsheet=False):
         idx+1,
         mid,
         name,
-        os,
         rating,
         to_emoji(difficulty),
-        to_emoji(owned),
+        os,
         to_emoji(oscplike),
+        to_emoji(owned),
       ))
 
     to_table(header=header, rows=rows, delim="___", aligndict=None, markdown=False)
