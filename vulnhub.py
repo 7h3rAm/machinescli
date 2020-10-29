@@ -309,6 +309,10 @@ class VulnHub:
     soup = BeautifulSoup(page, 'lxml')
     container = soup.find('div', id="description", class_="panel")
     print(111, url, 111)
+
+    if not container:
+      return machinestats
+
     machinestats["description"] = "\n".join([para.text for para in container.find_all('p', recursive=True)]).strip()
 
     # <li><b>Name</b>: Seppuku: 1</li>
