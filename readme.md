@@ -13,24 +13,23 @@ This tool provides commandline access for HackTheBox and VulnHub machines. It ca
 
 1. Show global stats from HackTheBox platform:
 ![Stats](screenshot03.png)
-
-1. Show stats for machines named `bashed` and `kioptirx`:
+1. Show stats for machines named `bashed` and `kioptrix`:
 ![Info](screenshot04.png)
 
-2. Search within machine descriptions for keyword `buffer overflow`:
+1. Search machine descriptions for keyword `buffer overflow`:
 ![Search](screenshot05.png)
 
-3. Summarize all writeups:
-![Summarize](screenshot06.png)
+1. Query owned machines using the built-in filter:
+![Query-Owned](screenshot06.png)
 
-4. Query writeups using built-in filters:
-![Query](screenshot07.png)
+1. Query owned HTB machines using the built-in filter:
+![Query-OwnedHTB](screenshot07.png)
 
-5. Query writeups using `jq` syntax:
+1. Query "owned AND NOT OSCPlike" machines using `jq`-style syntax:
 ![QueryJQ](screenshot08.png)
 
 ## Argument Autocomplete
-There's a `.bash-completion` file that one can source within a shell to trigger auto-complete for arguments. This will, however, require an alias to work which can be created as follows:
+There's a `.bash-completion` file that one can source within a shell to trigger auto-complete for arguments. This will, however, require an alias to work which can be created as follows: 
 ```console
 alias machinescli='python3 $HOME/toolbox/repos/machinescli/machinescli.py'
 ```
