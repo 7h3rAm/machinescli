@@ -2,7 +2,7 @@
 
 [![License: CC BY-SA 4.0](https://raw.githubusercontent.com/7h3rAm/7h3rAm.github.io/master/static/files/ccbysa4.svg)](https://creativecommons.org/licenses/by-sa/4.0/)
 
-This tool provides commandline access for [HackTheBox](https://www.hackthebox.eu) and [VulnHub](https://www.vulnhub.com/) machines. It can be useful for looking up machine details, interacting with HackTheBox portal, tracking owned/pending machines, etc. It also provides commandline based, [ippsec.rocks](https://ippsec.rocks/?#) like search facility for writeup descriptions and extends it to VulnHub machines as well. It works in conjuction with [svachal](https://github.com/7h3rAm/svachal) framework, so all machine writeups metadata is natively accessible:
+This tool provides commandline access for [HackTheBox](https://www.hackthebox.eu) and [VulnHub](https://www.vulnhub.com/) machines. It can be useful for looking up machine details, interacting with HackTheBox portal, tracking owned/pending machines, etc. It also provides commandline based, [ippsec.rocks](https://ippsec.rocks/?#) like search facility for writeup descriptions and extends it to VulnHub machines as well. It works in conjuction with [svachal](https://github.com/7h3rAm/svachal) framework, so all writeups metadata is natively accessible:
 
 ## Usage
 ![Usage](machinescli01.png)
