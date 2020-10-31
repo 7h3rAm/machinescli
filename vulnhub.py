@@ -308,8 +308,6 @@ class VulnHub:
 
     soup = BeautifulSoup(page, 'lxml')
     container = soup.find('div', id="description", class_="panel")
-    print(111, url, 111)
-
     if not container:
       return machinestats
 

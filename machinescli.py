@@ -400,6 +400,8 @@ class MachinesCLI:
     utils.info("updating vulnhub machines...")
     self._reload_owned()
     for machine in self.vhapi.get_all_machine_stats():
+      if not machine["name"]:
+        continue
       matchdict = machine
       del matchdict["avatar_thumb"]
       matchdict["infrastructure"] = "vulnhub"
