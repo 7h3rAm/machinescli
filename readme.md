@@ -25,7 +25,7 @@ This tool provides commandline access for HackTheBox and VulnHub machines. It ca
 1. Query owned HTB machines using the built-in filter:
 ![Query-OwnedHTB](screenshot07.png)
 
-1. Query "owned AND NOT OSCPlike" machines using `jq`-style syntax:
+1. Query `owned AND NOT OSCPlike` machines using `jq`-style syntax:
 ![QueryJQ](screenshot08.png)
 
 ## Argument Autocomplete
@@ -33,3 +33,4 @@ There's a `.bash-completion` file that one can source within a shell to trigger 
 ```console
 alias machinescli='python3 $HOME/toolbox/repos/machinescli/machinescli.py'
 ```
+s
