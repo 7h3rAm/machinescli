@@ -163,15 +163,21 @@ def get_http_res(url, headers={}, requoteuri=False):
   else:
     return requests.get(cleanup_url(url), headers=headers)
 
-def get_http(url, headers={}):
-  res = requests.get(cleanup_url(url), headers=headers)
+def get_http(url, headers={}, session=None):
+  if session:
+    res = session.get(cleanup_url(url), headers=headers)
+  else:
+    res = requests.get(cleanup_url(url), headers=headers)
   if res.status_code == 200:
     return res.json()
   else:
     return {}
 
-def post_http(url, data={}, headers={}):
-  res = requests.post(cleanup_url(url), data=json.dumps(data), headers=headers)
+def post_http(url, data={}, headers={}, session=None):
+  if session:
+    res = session.post(cleanup_url(url), data=json.dumps(data), headers=headers)
+  else:
+    res = requests.post(cleanup_url(url), data=json.dumps(data), headers=headers)
   if res.status_code == 200:
     return res.json()
   else:
