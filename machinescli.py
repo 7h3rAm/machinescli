@@ -10,11 +10,13 @@ import argparse
 import utils
 from vulnhub import VulnHub
 from hackthebox import HackTheBox
+from tryhackme import TryHackMe
 
 
 class MachinesCLI:
   def __init__(self):
     self.htbapi = HackTheBox(utils.expand_env(var="$HTB_API_KEY"))
+    self.thmapi = TryHackMe()
     self.vhapi = VulnHub()
     self.jsonify = False
     self.gsheet = False
@@ -29,36 +31,48 @@ class MachinesCLI:
 
     self.queries = {
       "all": '.machines[]',
-
+      "thm": '.machines[] | select(.infrastructure == "tryhackme")',
       "htb": '.machines[] | select(.infrastructure == "hackthebox")',
       "vh": '.machines[] | select(.infrastructure == "vulnhub")',
       "oscplike": '.machines[] | select(.oscplike == true)',
+      "notoscplike": '.machines[] | select(.oscplike != true)',
       "owned": '.machines[] | select(.owned_user == true or .owned_root == true)',
+      "ownedthm": '.machines[] | select(.infrastructure == "tryhackme" and (.owned_user == true or .owned_root == true))',
       "ownedhtb": '.machines[] | select(.infrastructure == "hackthebox" and (.owned_user == true or .owned_root == true))',
       "ownedvh": '.machines[] | select(.infrastructure == "vulnhub" and (.owned_user == true or .owned_root == true))',
+      "oscplikethm": '.machines[] | select(.infrastructure == "tryhackme" and .oscplike == true)',
       "oscplikehtb": '.machines[] | select(.infrastructure == "hackthebox" and .oscplike == true)',
       "oscplikevh": '.machines[] | select(.infrastructure == "vulnhub" and .oscplike == true)',
       "ownedoscplike": '.machines[] | select(.oscplike == true and (.owned_user == true or .owned_root == true))',
+      "notownedoscplike": '.machines[] | select(.oscplike == true and (.owned_user != true and .owned_root != true))',
       "ownednotoscplike": '.machines[] | select(.oscplike != true and (.owned_user == true or .owned_root == true))',
+      "ownedthmoscplike": '.machines[] | select(.infrastructure == "tryhackme" and .oscplike == true and (.owned_user == true or .owned_root == true))',
       "ownedhtboscplike": '.machines[] | select(.infrastructure == "hackthebox" and .oscplike == true and (.owned_user == true or .owned_root == true))',
       "ownedvhoscplike": '.machines[] | select(.infrastructure == "vulnhub" and .oscplike == true and (.owned_user == true or .owned_root == true))',
     }
+    self.queries["thmoscplike"] = self.queries["oscplikethm"]
+    self.queries["thmoscplikeowned"] = self.queries["ownedthmoscplike"]
+    self.queries["thmownedoscplike"] = self.queries["ownedthmoscplike"]
+
     self.queries["htboscplike"] = self.queries["oscplikehtb"]
     self.queries["htboscplikeowned"] = self.queries["ownedhtboscplike"]
     self.queries["htbownedoscplike"] = self.queries["ownedhtboscplike"]
 
-    self.queries["oscplikehtbowned"] = self.queries["ownedhtboscplike"]
-    self.queries["oscplikeowned"] = self.queries["ownedoscplike"]
-    self.queries["oscplikeownedhtb"] = self.queries["ownedhtboscplike"]
-    self.queries["oscplikeownedvh"] = self.queries["ownedvhoscplike"]
-    self.queries["oscplikevhowned"] = self.queries["ownedvhoscplike"]
-
-    self.queries["ownedoscplikehtb"] = self.queries["ownedhtboscplike"]
-    self.queries["ownedoscplikevh"] = self.queries["ownedvhoscplike"]
-
     self.queries["vhoscplike"] = self.queries["oscplikevh"]
     self.queries["vhoscplikeowned"] = self.queries["ownedvhoscplike"]
     self.queries["vhownedoscplike"] = self.queries["ownedvhoscplike"]
+
+    self.queries["oscplikeowned"] = self.queries["ownedoscplike"]
+    self.queries["oscplikeownedthm"] = self.queries["ownedthmoscplike"]
+    self.queries["oscplikethmowned"] = self.queries["ownedthmoscplike"]
+    self.queries["oscplikeownedhtb"] = self.queries["ownedhtboscplike"]
+    self.queries["oscplikehtbowned"] = self.queries["ownedhtboscplike"]
+    self.queries["oscplikeownedvh"] = self.queries["ownedvhoscplike"]
+    self.queries["oscplikevhowned"] = self.queries["ownedvhoscplike"]
+
+    self.queries["ownedoscplikethm"] = self.queries["ownedthmoscplike"]
+    self.queries["ownedoscplikehtb"] = self.queries["ownedhtboscplike"]
+    self.queries["ownedoscplikevh"] = self.queries["ownedvhoscplike"]
 
     self.ipsc = {}
 
@@ -70,6 +84,7 @@ class MachinesCLI:
     }
 
     self.points2difficulty = {
+      10: "warmup",
       20: "easy",
       30: "medium",
       40: "hard",
@@ -99,7 +114,7 @@ class MachinesCLI:
     self.ownedlist = sorted(list(set(filter(None, self.ownedlist))))
     utils.debug("reloaded owned list with %d entries from '%s'" % (len(self.ownedlist), self.ownedfile))
 
-  def _filter_machines(self, valuelist, infrastructure="htb", key=None):
+  def _filter_machines(self, valuelist, infrastructure="any", key=None):
     results, matched = [], []
     for value in valuelist:
       if value and value != "" and self.stats["machines"] and len(self.stats["machines"]):
@@ -113,6 +128,10 @@ class MachinesCLI:
             if type(value) == str:
               if value.lower().strip().startswith("http"):
                 key = "url"
+              elif value.lower().strip().startswith("tryhackme#") or value.lower().strip().startswith("thm#"):
+                key = "shortname"
+                infrastructure = "thm"
+                value = value.split("#", 1)[1]
               elif value.lower().strip().startswith("hackthebox#") or value.lower().strip().startswith("htb#"):
                 key = "id"
                 infrastructure = "htb"
@@ -127,12 +146,18 @@ class MachinesCLI:
           key = key.lower().strip()
         for entry in self.stats["machines"]:
           infrastructure = infrastructure.lower().strip()
+          if infrastructure in ["thm", "tryhackme"] and entry["infrastructure"] != "tryhackme":
+            continue
           if infrastructure in ["htb", "hackthebox"] and entry["infrastructure"] != "hackthebox":
             continue
           if infrastructure in ["vh", "vulnhub"] and entry["infrastructure"] != "vulnhub":
             continue
           if key in ["name"]:
             if value.lower().strip() in entry[key].lower().strip() and entry["verbose_id"] not in matched:
+              results.append(entry)
+              matched.append(entry["verbose_id"])
+          elif key in ["shortname"]:
+            if value.lower().strip() in entry[key].lower().strip() and entry["shortname"] not in matched:
               results.append(entry)
               matched.append(entry["verbose_id"])
           elif key in ["url"]:
@@ -194,6 +219,37 @@ class MachinesCLI:
       utils.info("got descriptions for %d writeup videos" % (self.ipsc["count"]))
 
   def _update_oscplike(self):
+    utils.info("updating oscplike tryhackme machines list...")
+    self.olsearchkeys["thm"] = []
+    self.olsearchkeys["thm"] += ["https://tryhackme.com/room/alfred"]
+    self.olsearchkeys["thm"] += ["https://tryhackme.com/room/attacktivedirectory"]
+    self.olsearchkeys["thm"] += ["https://tryhackme.com/room/blaster"]
+    self.olsearchkeys["thm"] += ["https://tryhackme.com/room/blue"]
+    self.olsearchkeys["thm"] += ["https://tryhackme.com/room/blueprint"]
+    self.olsearchkeys["thm"] += ["https://tryhackme.com/room/brainpan"]
+    self.olsearchkeys["thm"] += ["https://tryhackme.com/room/brainstorm"]
+    self.olsearchkeys["thm"] += ["https://tryhackme.com/room/bufferoverflowprep"]
+    self.olsearchkeys["thm"] += ["https://tryhackme.com/room/corp"]
+    self.olsearchkeys["thm"] += ["https://tryhackme.com/room/dailybugle"]
+    self.olsearchkeys["thm"] += ["https://tryhackme.com/room/gamezone"]
+    self.olsearchkeys["thm"] += ["https://tryhackme.com/room/gatekeeper"]
+    self.olsearchkeys["thm"] += ["https://tryhackme.com/room/hackpark"]
+    self.olsearchkeys["thm"] += ["https://tryhackme.com/room/introexploitdevelopment"]
+    self.olsearchkeys["thm"] += ["https://tryhackme.com/room/kenobi"]
+    self.olsearchkeys["thm"] += ["https://tryhackme.com/room/linuxprivesc"]
+    self.olsearchkeys["thm"] += ["https://tryhackme.com/room/lordoftheroot"]
+    self.olsearchkeys["thm"] += ["https://tryhackme.com/room/mrrobot"]
+    self.olsearchkeys["thm"] += ["https://tryhackme.com/room/powershell"]
+    self.olsearchkeys["thm"] += ["https://tryhackme.com/room/retro"]
+    self.olsearchkeys["thm"] += ["https://tryhackme.com/room/skynet"]
+    self.olsearchkeys["thm"] += ["https://tryhackme.com/room/steelmountain"]
+    self.olsearchkeys["thm"] += ["https://tryhackme.com/room/tomghost"]
+    self.olsearchkeys["thm"] += ["https://tryhackme.com/room/tonythetiger"]
+    self.olsearchkeys["thm"] += ["https://tryhackme.com/room/vulnversity"]
+    self.olsearchkeys["thm"] += ["https://tryhackme.com/room/windows10privesc"]
+    self.olsearchkeys["thm"] += ["https://tryhackme.com/room/windowsprivescarena"]
+    utils.debug("found %d entries for oscplike tryhackme machines" % (len(self.olsearchkeys["thm"])))
+
     # get listing of oscplike htb machines
     self.olsearchkeys["htb"] = []
     self.olsearchkeys["htb"] += ["remote", "sauna", "servmon", "traceback"] # https://medium.com/@peregerinebunny/my-oscp-journey-d3addc26f07b
@@ -212,7 +268,7 @@ class MachinesCLI:
             token = token.lower().replace(" [linux]", "").replace(" [windows]", "").strip()
             token = self.corrections[token] if token in self.corrections else token
             self.olsearchkeys["htb"].append(token)
-    utils.debug("found %d entries for hackthebox machines" % (len(self.olsearchkeys["htb"])))
+    utils.debug("found %d entries for oscplike hackthebox machines" % (len(self.olsearchkeys["htb"])))
 
     # get listing of oscplike vulnhub machines
     self.olsearchkeys["vh"] = []
@@ -313,7 +369,7 @@ class MachinesCLI:
         if match:
           name, mid, url = match.groups()[0], int(match.groups()[1]), "https://www.vulnhub.com/entry/%s,%s/" % (match.groups()[0], match.groups()[1])
           self.olsearchkeys["vh"].append(url)
-    utils.debug("found %d entries for vulnhub machines" % (len(self.olsearchkeys["vh"])))
+    utils.debug("found %d entries for oscplike vulnhub machines" % (len(self.olsearchkeys["vh"])))
 
   def _refresh_htb_owned(self):
     # get owned list from htb api
@@ -342,8 +398,8 @@ class MachinesCLI:
       matchdict["oscplike"] = True if matchdict["shortname"] in self.olsearchkeys["htb"] else False
       matchdict["url"] = "https://www.hackthebox.eu/home/machines/profile/%d" % (machine["id"])
       matchdict["owned_user"], matchdict["owned_root"] = False, False
-      for entry in owned:
-        if entry["id"] == matchdict["id"]:
+      for entry in self.ownedlist:
+        if entry.lower().strip() == matchdict["url"].lower().strip():
           matchdict["owned_user"], matchdict["owned_root"] = True, True
           break
       matchdict["difficulty_ratings"] = None
@@ -359,39 +415,43 @@ class MachinesCLI:
               "description": self.ipsc["entries"][entry]["description"],
             }
           }
+
       stats["counts"]["totaltotal"] += 1
       stats["counts"]["totalhtb"] += 1
+
       if matchdict["oscplike"]:
         stats["counts"]["totaloscplike"] += 1
         stats["counts"]["htboscplike"] += 1
-      if matchdict["os"].lower() == "windows":
-        stats["counts"]["totalwindows"] += 1
-        stats["counts"]["htbwindows"] += 1
-        if matchdict["oscplike"]:
-          stats["counts"]["oscplikewindows"] += 1
-      else:
-        stats["counts"]["totalnix"] += 1
-        stats["counts"]["htbnix"] += 1
-        if matchdict["oscplike"]:
-          stats["counts"]["oscplikenix"] += 1
+
+      if matchdict["os"]:
+        if matchdict["os"].lower() == "windows":
+          stats["counts"]["totalwindows"] += 1
+          stats["counts"]["htbwindows"] += 1
+          if matchdict["oscplike"]:
+            stats["counts"]["oscplikewindows"] += 1
+        else:
+          stats["counts"]["totalnix"] += 1
+          stats["counts"]["htbnix"] += 1
+          if matchdict["oscplike"]:
+            stats["counts"]["oscplikenix"] += 1
+
       if matchdict["owned_user"] or matchdict["owned_root"]:
         stats["counts"]["ownedhtb"] += 1
         stats["counts"]["ownedtotal"] += 1
+        if matchdict["os"] and matchdict["os"].lower() != "windows":
+          stats["counts"]["ownedhtbnix"] += 1
+          stats["counts"]["ownednix"] += 1
+        if matchdict["os"] and matchdict["os"].lower() == "windows":
+          stats["counts"]["ownedhtbwindows"] += 1
+          stats["counts"]["ownedwindows"] += 1
         if matchdict["oscplike"]:
           stats["counts"]["ownedhtboscplike"] += 1
           stats["counts"]["ownedoscplike"] += 1
-        if matchdict["os"].lower() == "windows":
-          stats["counts"]["ownedhtbwindows"] += 1
-          stats["counts"]["ownedoscplikewindows"] += 1
-        else:
-          stats["counts"]["ownedhtbnix"] += 1
+        if matchdict["oscplike"] and matchdict["os"] and matchdict["os"].lower() != "windows":
           stats["counts"]["ownedoscplikenix"] += 1
-        if matchdict["os"].lower() == "windows":
-          stats["counts"]["ownedhtbwindows"] += 1
-          stats["counts"]["ownedwindows"] += 1
-        else:
-          stats["counts"]["ownedhtbnix"] += 1
-          stats["counts"]["ownednix"] += 1
+        if matchdict["oscplike"] and matchdict["os"] and matchdict["os"].lower() == "windows":
+          stats["counts"]["ownedoscplikewindows"] += 1
+  
       stats["machines"].append(matchdict)
     utils.info("found %d hackthebox machines" % (stats["counts"]["totalhtb"]))
     return stats
@@ -424,41 +484,134 @@ class MachinesCLI:
               "description": self.ipsc["entries"][entry]["description"],
             }
           }
+
       stats["counts"]["totaltotal"] += 1
       stats["counts"]["totalvh"] += 1
+
       if matchdict["oscplike"]:
         stats["counts"]["totaloscplike"] += 1
         stats["counts"]["vhoscplike"] += 1
-      if matchdict["os"].lower() == "windows":
-        stats["counts"]["totalwindows"] += 1
-        stats["counts"]["vhwindows"] += 1
-        if matchdict["oscplike"]:
-          stats["counts"]["oscplikewindows"] += 1
-      else:
-        stats["counts"]["totalnix"] += 1
-        stats["counts"]["vhnix"] += 1
-        if matchdict["oscplike"]:
-          stats["counts"]["oscplikenix"] += 1
+
+      if matchdict["os"]:
+        if matchdict["os"].lower() == "windows":
+          stats["counts"]["totalwindows"] += 1
+          stats["counts"]["vhwindows"] += 1
+          if matchdict["oscplike"]:
+            stats["counts"]["oscplikewindows"] += 1
+        else:
+          stats["counts"]["totalnix"] += 1
+          stats["counts"]["vhnix"] += 1
+          if matchdict["oscplike"]:
+            stats["counts"]["oscplikenix"] += 1
+
       if matchdict["owned_user"] or matchdict["owned_root"]:
         stats["counts"]["ownedvh"] += 1
         stats["counts"]["ownedtotal"] += 1
+        if matchdict["os"] and matchdict["os"].lower() != "windows":
+          stats["counts"]["ownedvhnix"] += 1
+          stats["counts"]["ownednix"] += 1
+        if matchdict["os"] and matchdict["os"].lower() == "windows":
+          stats["counts"]["ownedvhwindows"] += 1
+          stats["counts"]["ownedwindows"] += 1
         if matchdict["oscplike"]:
           stats["counts"]["ownedvhoscplike"] += 1
           stats["counts"]["ownedoscplike"] += 1
-        if matchdict["os"].lower() == "windows":
-          stats["counts"]["ownedvhwindows"] += 1
-          stats["counts"]["ownedoscplikewindows"] += 1
-        else:
-          stats["counts"]["ownedvhnix"] += 1
+        if matchdict["oscplike"] and matchdict["os"] and matchdict["os"].lower() != "windows":
           stats["counts"]["ownedoscplikenix"] += 1
-        if matchdict["os"].lower() == "windows":
-          stats["counts"]["ownedvhwindows"] += 1
-          stats["counts"]["ownedwindows"] += 1
-        else:
-          stats["counts"]["ownedvhnix"] += 1
-          stats["counts"]["ownednix"] += 1
+        if matchdict["oscplike"] and matchdict["os"] and matchdict["os"].lower() == "windows":
+          stats["counts"]["ownedoscplikewindows"] += 1
+
       stats["machines"].append(machine)
     utils.info("found %d vulnhub machines" % (stats["counts"]["totalvh"]))
+    return stats
+
+  def _update_tryhackme(self, stats):
+    utils.info("updating tryhackme machines...")
+    d2p = dict((v,k) for k,v in self.points2difficulty.items())
+    for room in self.thmapi.rooms():
+      matchdict = {
+        "description": room["description"],
+        "difficulty": room["difficulty"],
+        "difficulty_ratings": None,
+        "id": "tryhackme#%s" % (room["code"]),
+        "infrastructure": "tryhackme",
+        "maker": {
+          "id": None,
+          "name": room["creator"],
+          "url": None,
+        },
+        "name": room["title"],
+        "os": None,
+        "oscplike": None,
+        "owned_root": False,
+        "owned_user": False,
+        "points": d2p[room["difficulty"]],
+        "release": room["published"],
+        "series": {
+          "id": None,
+          "name": None,
+          "url": None,
+        },
+        "shortname": room["code"],
+        "url": "https://tryhackme.com/room/%s" % (room["code"]),
+        "verbose_id": "tryhackme#%s" % (room["code"]),
+      }
+
+      matchdict["oscplike"] = True if matchdict["url"] in self.olsearchkeys["thm"] else False
+      matchdict["owned_user"], matchdict["owned_root"] = False, False
+      for entry in self.ownedlist:
+        if entry.lower().strip() == matchdict["url"].lower().strip():
+          matchdict["owned_user"], matchdict["owned_root"] = True, True
+          break
+      matchdict["difficulty_ratings"] = None
+      for entry in self.ipsc["entries"]:
+        if matchdict["infrastructure"] in entry.lower().strip() and matchdict["name"].lower().strip() in entry.lower().strip():
+          matchdict["writeups"] = {
+            "ippsec": {
+              "name": entry,
+              "video_url": self.ipsc["entries"][entry]["video_url"],
+              "description": self.ipsc["entries"][entry]["description"],
+            }
+          }
+
+      stats["counts"]["totaltotal"] += 1
+      stats["counts"]["totalthm"] += 1
+
+      if matchdict["oscplike"]:
+        stats["counts"]["totaloscplike"] += 1
+        stats["counts"]["thmoscplike"] += 1
+
+      if matchdict["os"]:
+        if matchdict["os"].lower() == "windows":
+          stats["counts"]["totalwindows"] += 1
+          stats["counts"]["thmwindows"] += 1
+          if matchdict["oscplike"]:
+            stats["counts"]["oscplikewindows"] += 1
+        else:
+          stats["counts"]["totalnix"] += 1
+          stats["counts"]["thmnix"] += 1
+          if matchdict["oscplike"]:
+            stats["counts"]["oscplikenix"] += 1
+
+      if matchdict["owned_user"] or matchdict["owned_root"]:
+        stats["counts"]["ownedthm"] += 1
+        stats["counts"]["ownedtotal"] += 1
+        if matchdict["os"] and matchdict["os"].lower() != "windows":
+          stats["counts"]["ownedthmnix"] += 1
+          stats["counts"]["ownednix"] += 1
+        if matchdict["os"] and matchdict["os"].lower() == "windows":
+          stats["counts"]["ownedthmwindows"] += 1
+          stats["counts"]["ownedwindows"] += 1
+        if matchdict["oscplike"]:
+          stats["counts"]["ownedthmoscplike"] += 1
+          stats["counts"]["ownedoscplike"] += 1
+        if matchdict["oscplike"] and matchdict["os"] and matchdict["os"].lower() != "windows":
+          stats["counts"]["ownedoscplikenix"] += 1
+        if matchdict["oscplike"] and matchdict["os"] and matchdict["os"].lower() == "windows":
+          stats["counts"]["ownedoscplikewindows"] += 1
+
+      stats["machines"].append(matchdict)
+    utils.info("found %d tryhackme machines" % (stats["counts"]["totalthm"]))
     return stats
 
   def update(self):
@@ -477,6 +630,10 @@ class MachinesCLI:
         "ownedoscplike": 0,
         "ownedoscplikenix": 0,
         "ownedoscplikewindows": 0,
+        "ownedthm": 0,
+        "ownedthmnix": 0,
+        "ownedthmoscplike": 0,
+        "ownedthmwindows": 0,
         "ownedtotal": 0,
         "ownedvh": 0,
         "ownedvhnix": 0,
@@ -491,15 +648,23 @@ class MachinesCLI:
         "peroscplike": 0,
         "peroscplikenix": 0,
         "peroscplikewindows": 0,
+        "perthm": 0,
+        "perthmnix": 0,
+        "perthmoscplike": 0,
+        "perthmwindows": 0,
         "pertotal": 0,
         "pervh": 0,
         "pervhnix": 0,
         "pervhoscplike": 0,
         "pervhwindows": 0,
         "perwindows": 0,
+        "thmnix": 0,
+        "thmoscplike": 0,
+        "thmwindows": 0,
         "totalhtb": 0,
         "totalnix": 0,
         "totaloscplike": 0,
+        "totalthm": 0,
         "totaltotal": 0,
         "totalvh": 0,
         "totalwindows": 0,
@@ -515,8 +680,14 @@ class MachinesCLI:
     self._update_oscplike()
 
     # infrastructure/platform sources
+    stats = self._update_tryhackme(stats)
     stats = self._update_hackthebox(stats)
     stats = self._update_vulnhub(stats)
+
+    stats["counts"]["perthm"] = (stats["counts"]["ownedthm"]/stats["counts"]["totalthm"])*100 if stats["counts"]["totalthm"] else 0
+    stats["counts"]["perthmnix"] = (stats["counts"]["ownedthmnix"]/stats["counts"]["thmnix"])*100 if stats["counts"]["thmnix"] else 0
+    stats["counts"]["perthmwindows"] = (stats["counts"]["ownedthmwindows"]/stats["counts"]["thmwindows"])*100 if stats["counts"]["thmwindows"] else 0
+    stats["counts"]["perthmoscplike"] = (stats["counts"]["ownedthmoscplike"]/stats["counts"]["thmoscplike"])*100 if stats["counts"]["thmoscplike"] else 0
 
     stats["counts"]["perhtb"] = (stats["counts"]["ownedhtb"]/stats["counts"]["totalhtb"])*100 if stats["counts"]["totalhtb"] else 0
     stats["counts"]["perhtbnix"] = (stats["counts"]["ownedhtbnix"]/stats["counts"]["htbnix"])*100 if stats["counts"]["htbnix"] else 0
@@ -700,7 +871,7 @@ class MachinesCLI:
 
 
 if __name__ == "__main__":
-  parser = argparse.ArgumentParser(description="%s (v%s)" % (utils.blue_bold("machinescli"), utils.green_bold("0.1")))
+  parser = argparse.ArgumentParser(description="%s (v%s): Command-line interface for %s, %s and %s machines." % (utils.blue_bold("machinescli"), utils.green_bold("0.1"), utils.magenta_bold("HackTheBox"), utils.cyan_bold("TryHackMe"), utils.yellow_bold("VulnHub")))
 
   # global flag to switch output mode; useful for debugging with jq
   ggroup = parser.add_mutually_exclusive_group()
@@ -717,7 +888,7 @@ if __name__ == "__main__":
   # results could differ from htbgroup calls if local stats file has not been updated in a while
   lsgroup = mcgroup.add_mutually_exclusive_group()
   lsgroup.add_argument('--counts', required=False, action='store_true', default=False, help='show counts for all machines')
-  lsgroup.add_argument('--query', required=False, action='store', help='show stats for queried machines (all|htb|vh|owned|ownedhtb|ownedvh|oscplike|oscplikehtb|oscplikevh|ownedoscplike|ownednotoscplike|ownedoscplikehtb|ownedoscplikevh)')
+  lsgroup.add_argument('--query', required=False, action='store', help='show stats for queried machines (all|thm|htb|vh|oscplike|notoscplike|owned|ownedthm|ownedhtb|ownedvh|oscplikethm|oscplikehtb|oscplikevh|ownedoscplike|notownedoscplike|ownednotoscplike|ownedthmoscplike|ownedhtboscplike|ownedvhoscplike)')
 
   lsgroup.add_argument('--info', required=False, action='store', help='query local stats file for machine name|url|id')
   lsgroup.add_argument('--search', required=False, action='store', help='query local stats file for machine writeup|description')
