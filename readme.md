@@ -7,7 +7,7 @@ This tool provides commandline access for [HackTheBox](https://www.hackthebox.eu
 - Look up machine details across HTB/THM/VH
 - Track owned/pending/todo machines
 - Interact with HTB portal and assign/remove/own/query machines
-- Search using [ippsec.rocks](https://ippsec.rocks/?#) like option for writeup descriptions
+- Search writeup descriptions using [ippsec.rocks](https://ippsec.rocks/?#) like option
 - Search machine details using `jq`-style query language
 
 > `machinescli` works in conjuction with [svachal](https://github.com/7h3rAm/svachal) framework.
