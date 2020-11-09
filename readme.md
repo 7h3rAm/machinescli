@@ -44,6 +44,9 @@ This tool provides commandline access for [HackTheBox](https://www.hackthebox.eu
 1. Perform `assign` and `remove` operations on a HackTheBox machine:
 ![Stats](machinescli10.png)
 
+1. Show global stats from TryHackMe platform:
+![Stats](machinescli11.png)
+
 ## Argument Autocomplete
 Source the `.bash-completion` file within a shell to trigger auto-complete for arguments. This will require the following alias (change path as needed): 
 ```console

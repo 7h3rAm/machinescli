@@ -869,6 +869,9 @@ class MachinesCLI:
       self.htbapi.machines_todo_update(entry)
     self.htb_todos()
 
+  def thm_stats(self):
+    utils.to_json(self.thmapi.stats_global())
+
 
 if __name__ == "__main__":
   parser = argparse.ArgumentParser(description="%s (v%s): Command-line interface for %s, %s and %s machines." % (utils.blue_bold("machinescli"), utils.green_bold("0.1"), utils.magenta_bold("HackTheBox"), utils.cyan_bold("TryHackMe"), utils.yellow_bold("VulnHub")))
@@ -908,6 +911,9 @@ if __name__ == "__main__":
   htbgroup.add_argument('--htb-terminating', required=False, action='store_true', default=False, help='show hackthebox machines currently listed for termination')
   htbgroup.add_argument('--htb-todo', required=False, action='store', help='add to todo list a hackthebox machine name|url|id')
   htbgroup.add_argument('--htb-todos', required=False, action='store_true', default=False, help='show hackthebox todo machines')
+
+  thmgroup = mcgroup.add_mutually_exclusive_group()
+  thmgroup.add_argument('--thm-stats', required=False, action='store_true', default=False, help='show tryhackme platform stats')
 
   args = parser.parse_args()
 
@@ -975,6 +981,9 @@ if __name__ == "__main__":
 
   elif args.htb_todo:
     mcli.htb_todo(args.htb_todo)
+
+  elif args.thm_stats:
+    mcli.thm_stats()
 
   else:
     parser.print_help()
