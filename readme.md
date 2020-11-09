@@ -41,7 +41,7 @@ This tool provides commandline access for [HackTheBox](https://www.hackthebox.eu
 1. Show `spawned` machines and `expiry` stats from HackTheBox platform:
 ![Stats](machinescli09.png)
 
-1. Perform machine `assign` and `remove` operations on a HackTheBox machine:
+1. Perform `assign` and `remove` operations on a HackTheBox machine:
 ![Stats](machinescli10.png)
 
 ## Argument Autocomplete
