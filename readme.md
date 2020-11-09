@@ -36,16 +36,16 @@ This tool provides commandline access for [HackTheBox](https://www.hackthebox.eu
 ![QueryJQ](machinescli07.png)
 
 1. Show global stats from HackTheBox platform:
-![Stats](machinescli08.png)
+![HTB-Stats](machinescli08.png)
 
 1. Show `spawned` machines and `expiry` stats from HackTheBox platform:
-![Stats](machinescli09.png)
+![HTB-Spawned-Expiry](machinescli09.png)
 
 1. Perform `assign` and `remove` operations on a HackTheBox machine:
-![Stats](machinescli10.png)
+![HTB-Assign-Remove](machinescli10.png)
 
 1. Show global stats from TryHackMe platform:
-![Stats](machinescli11.png)
+![THM-Stats](machinescli11.png)
 
 ## Argument Autocomplete
 Source the `.bash-completion` file within a shell to trigger auto-complete for arguments. This will require the following alias (change path as needed): 
