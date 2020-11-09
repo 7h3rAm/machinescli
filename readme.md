@@ -11,7 +11,7 @@ This tool provides commandline access for [HackTheBox](https://www.hackthebox.eu
 - Search machine details using `jq`-style query language
 
 > `machinescli` works in conjuction with [svachal](https://github.com/7h3rAm/svachal) framework.
-> As such if you wish to extend and use writeup metadata, it will be natively accessible via the shared `machines.json` file.
+> As such, if you wish to extend and use writeup metadata, it will be natively accessible via the shared `machines.json` file.
 
 ## Usage
 ![Usage](machinescli01.png)
