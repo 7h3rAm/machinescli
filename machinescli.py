@@ -198,6 +198,8 @@ class MachinesCLI:
     }
     entries = utils.download_json(self.ipsc["url"])
     for entry in entries:
+      if not entry.get("videoId", None):
+        continue
       name = utils.strip_html(entry["machine"])
       video_url = "https://www.youtube.com/watch?v=%s&t=0" % (entry["videoId"])
       hours = int(entry["timestamp"]["minutes"] // 60); minutes = entry["timestamp"]["minutes"] - (hours*60)
@@ -261,13 +263,12 @@ class MachinesCLI:
     with open(self.htbcsvfile) as fp:
       htbdata = fp.read()
     lines = htbdata.split("\n")
-    if lines[2] == 'Linux Boxes:,Windows Boxes:,"More challenging than OSCP, but good practice:",':
-      for line in lines[3:]:
-        for token in line.split(",", 3):
-          if token and token != "":
-            token = token.lower().replace(" [linux]", "").replace(" [windows]", "").strip()
-            token = self.corrections[token] if token in self.corrections else token
-            self.olsearchkeys["htb"].append(token)
+    for line in lines[5:]:
+      for token in line.split(",", 3):
+        if token and token != "":
+          token = token.lower().replace(" [linux]", "").replace(" [windows]", "").strip()
+          token = self.corrections[token] if token in self.corrections else token
+          self.olsearchkeys["htb"].append(token)
     utils.debug("found %d entries for oscplike hackthebox machines" % (len(self.olsearchkeys["htb"])))
 
     # get listing of oscplike vulnhub machines
