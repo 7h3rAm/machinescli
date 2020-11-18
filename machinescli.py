@@ -223,6 +223,19 @@ class MachinesCLI:
   def _update_oscplike(self):
     utils.info("updating oscplike tryhackme machines list...")
     self.olsearchkeys["thm"] = []
+    # https://docs.google.com/spreadsheets/d/1zYQOcr2h2VnRelm0Unx9Sg0Qg1MYDWUg/edit#gid=948740074
+    self.olsearchkeys["thm"] += ["https://tryhackme.com/room/0day"]
+    self.olsearchkeys["thm"] += ["https://tryhackme.com/room/cherryblossom"]
+    self.olsearchkeys["thm"] += ["https://tryhackme.com/room/internal"]
+    self.olsearchkeys["thm"] += ["https://tryhackme.com/room/jacobtheboss"]
+    self.olsearchkeys["thm"] += ["https://tryhackme.com/room/jeff"]
+    self.olsearchkeys["thm"] += ["https://tryhackme.com/room/marketplace"]
+    self.olsearchkeys["thm"] += ["https://tryhackme.com/room/mindgames"]
+    self.olsearchkeys["thm"] += ["https://tryhackme.com/room/theblobblog"]
+    self.olsearchkeys["thm"] += ["https://tryhackme.com/room/ultratech1"]
+    self.olsearchkeys["thm"] += ["https://tryhackme.com/room/wwbuddy"]
+    self.olsearchkeys["thm"] += ["https://tryhackme.com/room/yearofthedog"]
+    # curated from thm pentest path
     self.olsearchkeys["thm"] += ["https://tryhackme.com/room/alfred"]
     self.olsearchkeys["thm"] += ["https://tryhackme.com/room/attacktivedirectory"]
     self.olsearchkeys["thm"] += ["https://tryhackme.com/room/blaster"]
@@ -256,12 +269,12 @@ class MachinesCLI:
     self.olsearchkeys["htb"] = []
     self.olsearchkeys["htb"] += ["remote", "sauna", "servmon", "traceback"] # https://medium.com/@peregerinebunny/my-oscp-journey-d3addc26f07b
     self.olsearchkeys["htb"] += ["heist"] # https://medium.com/@bondo.mike/htb-heist-390c079a20e5
+    self.olsearchkeys["htb"] += ["cache", "jeeves", "lame", "legacy", "passage"] # https://docs.google.com/spreadsheets/d/1zYQOcr2h2VnRelm0Unx9Sg0Qg1MYDWUg/edit#gid=683089738
     utils.info("updating oscplike hackthebox machines list...")
     self.olsearchkeys["htb"] = list(set(self.olsearchkeys["htb"]))
     utils.download("https://docs.google.com/spreadsheets/d/1dwSMIAPIam0PuRBkCiDI88pU3yzrqqHkDtBngUHNCw8/export?format=csv&gid=1839402159", self.htbcsvfile)
     utils.debug("saved tjnull's oscplike hackthebox machines list to '%s'" % (self.htbcsvfile))
-    with open(self.htbcsvfile) as fp:
-      htbdata = fp.read()
+    with open(self.htbcsvfile) as fp: htbdata = fp.read()
     lines = htbdata.split("\n")
     for line in lines[5:]:
       for token in line.split(",", 3):
@@ -355,18 +368,60 @@ class MachinesCLI:
     self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/wakanda-1,251/"]
     self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/wintermute-1,239/"]
     self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/xtreme-vulnerable-web-application-xvwa-1,209/"]
-
+    # https://docs.google.com/spreadsheets/d/1zYQOcr2h2VnRelm0Unx9Sg0Qg1MYDWUg/edit#gid=566064791
+    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/assertion-101,495/"]
+    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/bob-101,226/"]
+    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/breach-1,152/"]
+    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/breach-21,159/"]
+    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/breach-301,177/"]
+    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/dc-8,367/"]
+    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/dc-9,412/"]
+    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/depth-1,213/"]
+    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/djinn-1,397/"]
+    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/evm-1,391/"]
+    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/five86-2,418/"]
+    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/gitroot-1,488/"]
+    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/goldeneye-1,240/"]
+    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/greenoptic-1,510/"]
+    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/hacker-fest-2019,378/"]
+    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/hackme-1,330/"]
+    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/lampiao-1,249/"]
+    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/lemonsqueezy-1,473/"]
+    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/misdirection-1,371/"]
+    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/my-cmsms-1,498/"]
+    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/nullbyte-1,126/"]
+    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/pinkys-palace-v1,225/"]
+    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/pinkys-palace-v2,229/"]
+    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/powergrid-101,485/"]
+    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/presidential-1,500/"]
+    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/sar-1,425/"]
+    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/scarecrow-11,354/"]
+    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/sunset-decoy,505/"]
+    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/sunset-midnight,517/"]
+    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/sunset-midnight,517/"]
+    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/sunset-twilight,512/"]
+    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/symfonos-2,331/"]
+    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/symfonos-31,332/"]
+    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/symfonos-4,347/"]
+    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/ted-1,327/"]
+    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/temple-of-doom-1,243/"]
+    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/tommy-boy-1,157/"]
+    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/tr0ll-2,107/"]
+    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/tre-1,483/"]
+    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/w34kn3ss-1,270/"]
+    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/web-developer-1,288/"]
+    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/zico2-1,210/"]
     utils.info("updating oscplike vulnhub machines list...")
     self.olsearchkeys["vh"] = list(set(self.olsearchkeys["vh"]))
     utils.download("https://docs.google.com/spreadsheets/d/1dwSMIAPIam0PuRBkCiDI88pU3yzrqqHkDtBngUHNCw8/export?format=csv&gid=0", self.vhcsvfile)
     utils.debug("saved tjnull's oscplike vulnhub machines list to '%s'" % (self.vhcsvfile))
-    with open(self.vhcsvfile) as fp:
-      vhdata = fp.read()
+    with open(self.vhcsvfile) as fp: vhdata = fp.read()
     lines = vhdata.split("\n")
-    if lines[3].split(",")[0] == "VMs Highlighted in pink are considered to be similar to OSCP":
-      for line in lines[4:]:
-        celldata = line.replace('",', '"___')
-        match = re.search(r'vulnhub\.com/entry/(.+),(\d+)', celldata.split("___", 1)[0])
+    for line in lines[5:]:
+      celldata = line.replace('",', '"___')
+      for entry in celldata.split("___"):
+        if not entry: continue
+        match = re.search(r'vulnhub\.com/entry/(.+),(\d+)', entry)
         if match:
           name, mid, url = match.groups()[0], int(match.groups()[1]), "https://www.vulnhub.com/entry/%s,%s/" % (match.groups()[0], match.groups()[1])
           self.olsearchkeys["vh"].append(url)
@@ -395,6 +450,7 @@ class MachinesCLI:
       matchdict["verbose_id"] = "hackthebox#%d" % (matchdict["id"])
       matchdict["difficulty"] = self.points2difficulty[machine["points"]]
       matchdict["shortname"] = machine["name"].lower().strip()
+      utils.to_json(matchdict)
       matchdict["matrix"] = self.htbapi.machines_get_matrix(matchdict["id"]); del matchdict["matrix"]["success"]
       matchdict["oscplike"] = True if matchdict["shortname"] in self.olsearchkeys["htb"] else False
       matchdict["url"] = "https://www.hackthebox.eu/home/machines/profile/%d" % (machine["id"])
@@ -679,6 +735,7 @@ class MachinesCLI:
     # useful metadata sources
     self._update_ippsec()
     self._update_oscplike()
+    #exit(0)
 
     # infrastructure/platform sources
     stats = self._update_tryhackme(stats)
