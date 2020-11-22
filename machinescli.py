@@ -450,7 +450,6 @@ class MachinesCLI:
       matchdict["verbose_id"] = "hackthebox#%d" % (matchdict["id"])
       matchdict["difficulty"] = self.points2difficulty[machine["points"]]
       matchdict["shortname"] = machine["name"].lower().strip()
-      utils.to_json(matchdict)
       matchdict["matrix"] = self.htbapi.machines_get_matrix(matchdict["id"]); del matchdict["matrix"]["success"]
       matchdict["oscplike"] = True if matchdict["shortname"] in self.olsearchkeys["htb"] else False
       matchdict["url"] = "https://www.hackthebox.eu/home/machines/profile/%d" % (machine["id"])
@@ -735,7 +734,6 @@ class MachinesCLI:
     # useful metadata sources
     self._update_ippsec()
     self._update_oscplike()
-    #exit(0)
 
     # infrastructure/platform sources
     stats = self._update_tryhackme(stats)
