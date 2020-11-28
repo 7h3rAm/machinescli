@@ -1,4 +1,0 @@
-revised update process: get stats for new machines only
-no need for fullupdate option as counting for own method can be called by invoking _do_counts directly
-oscplike master flat file, like owned urls list. will add to live data from tjnull csv
-add thm in counts summary

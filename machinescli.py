@@ -461,10 +461,11 @@ class MachinesCLI:
     if self.jsonify:
       utils.to_json(self.stats["counts"])
     else:
-      header, rows = ["#", "Total", "HackTheBox", "VulnHub", "OSCPlike"], []
+      header, rows = ["#", "Total", "TryHackMe", "HackTheBox", "VulnHub", "OSCPlike"], []
       rows.append("___".join([x for x in [
         "%s" % (utils.green("Total")),
         "%s/%s (%s)" % (utils.green(self.stats["counts"]["ownedtotal"]), utils.green(self.stats["counts"]["totaltotal"]), utils.green("%.2f%%" % (self.stats["counts"]["pertotal"]))),
+        "%s/%s (%s)" % (utils.green(self.stats["counts"]["ownedthm"]), utils.green(self.stats["counts"]["totalthm"]), utils.green("%.2f%%" % (self.stats["counts"]["perthm"]))),
         "%s/%s (%s)" % (utils.green(self.stats["counts"]["ownedhtb"]), utils.green(self.stats["counts"]["totalhtb"]), utils.green("%.2f%%" % (self.stats["counts"]["perhtb"]))),
         "%s/%s (%s)" % (utils.green(self.stats["counts"]["ownedvh"]), utils.green(self.stats["counts"]["totalvh"]), utils.green("%.2f%%" % (self.stats["counts"]["pervh"]))),
         "%s/%s (%s)" % (utils.red(self.stats["counts"]["ownedoscplike"]), utils.red(self.stats["counts"]["totaloscplike"]), utils.red("%.2f%%" % (self.stats["counts"]["peroscplike"]))),
@@ -472,6 +473,7 @@ class MachinesCLI:
       rows.append("___".join([str(x) for x in [
         utils.yellow("Windows"),
         "%s/%s (%s)" % (utils.yellow(self.stats["counts"]["ownedwindows"]), utils.yellow(self.stats["counts"]["totalwindows"]), utils.yellow("%.2f%%" % (self.stats["counts"]["perwindows"]))),
+        "%s/%s (%s)" % (utils.yellow(self.stats["counts"]["ownedthmwindows"]), utils.yellow(self.stats["counts"]["thmwindows"]), utils.yellow("%.2f%%" % (self.stats["counts"]["perthmwindows"]))),
         "%s/%s (%s)" % (utils.yellow(self.stats["counts"]["ownedhtbwindows"]), utils.yellow(self.stats["counts"]["htbwindows"]), utils.yellow("%.2f%%" % (self.stats["counts"]["perhtbwindows"]))),
         "%s/%s (%s)" % (utils.yellow(self.stats["counts"]["ownedvhwindows"]), utils.yellow(self.stats["counts"]["vhwindows"]), utils.yellow("%.2f%%" % (self.stats["counts"]["pervhwindows"]))),
         "%s/%s (%s)" % (utils.yellow(self.stats["counts"]["ownedoscplikewindows"]), utils.yellow(self.stats["counts"]["oscplikewindows"]), utils.yellow("%.2f%%" % (self.stats["counts"]["peroscplikewindows"]))),
@@ -479,6 +481,7 @@ class MachinesCLI:
       rows.append("___".join([str(x) for x in [
         utils.magenta("*nix"),
         "%s/%s (%s)" % (utils.magenta(self.stats["counts"]["ownednix"]), utils.magenta(self.stats["counts"]["totalnix"]), utils.magenta("%.2f%%" % (self.stats["counts"]["pernix"]))),
+        "%s/%s (%s)" % (utils.magenta(self.stats["counts"]["ownedthmnix"]), utils.magenta(self.stats["counts"]["thmnix"]), utils.magenta("%.2f%%" % (self.stats["counts"]["perthmnix"]))),
         "%s/%s (%s)" % (utils.magenta(self.stats["counts"]["ownedhtbnix"]), utils.magenta(self.stats["counts"]["htbnix"]), utils.magenta("%.2f%%" % (self.stats["counts"]["perhtbnix"]))),
         "%s/%s (%s)" % (utils.magenta(self.stats["counts"]["ownedvhnix"]), utils.magenta(self.stats["counts"]["vhnix"]), utils.magenta("%.2f%%" % (self.stats["counts"]["pervhnix"]))),
         "%s/%s (%s)" % (utils.magenta(self.stats["counts"]["ownedoscplikenix"]), utils.magenta(self.stats["counts"]["oscplikenix"]), utils.magenta("%.2f%%" % (self.stats["counts"]["peroscplikenix"]))),
@@ -486,16 +489,18 @@ class MachinesCLI:
       rows.append("___".join([str(x) for x in [
         utils.red("OSCPlike"),
         "%s/%s (%s)" % (utils.red(self.stats["counts"]["ownedoscplike"]), utils.red(self.stats["counts"]["totaloscplike"]), utils.red("%.2f%%" % (self.stats["counts"]["peroscplike"]))),
+        "%s/%s (%s)" % (utils.red(self.stats["counts"]["ownedthmoscplike"]), utils.red(self.stats["counts"]["thmoscplike"]), utils.red("%.2f%%" % (self.stats["counts"]["perthmoscplike"]))),
         "%s/%s (%s)" % (utils.red(self.stats["counts"]["ownedhtboscplike"]), utils.red(self.stats["counts"]["htboscplike"]), utils.red("%.2f%%" % (self.stats["counts"]["perhtboscplike"]))),
         "%s/%s (%s)" % (utils.red(self.stats["counts"]["ownedvhoscplike"]), utils.red(self.stats["counts"]["vhoscplike"]), utils.red("%.2f%%" % (self.stats["counts"]["pervhoscplike"]))),
         utils.red(""),
       ]]))
       aligndict = {
-        "#": "c",
-        "Total": "r",
-        "HackTheBox": "r",
-        "VulnHub": "r",
-        "OSCPlike": "r",
+        "#": "r",
+        "Total": "l",
+        "TryHackMe": "l",
+        "HackTheBox": "l",
+        "VulnHub": "l",
+        "OSCPlike": "l",
       }
       utils.to_table(header, rows, delim="___", aligndict=aligndict)
 

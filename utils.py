@@ -353,7 +353,7 @@ def show_machines(data, sort_key="name", jsonify=False, gsheet=False):
           owned = "access_user"
         else:
           owned = "access_none"
-        oscplike = "oscplike" if entry["oscplike"] else "notoscplike"
+        oscplike = "oscplike" if entry.get("oscplike") and entry["oscplike"] else "notoscplike"
         private = to_emoji("private") if entry["private"] else to_emoji("public")
         rows.append("%s.___%s___%s___%s___%s___%s___%s___%s___%s" % (
         idx+1,
@@ -381,7 +381,7 @@ def show_machines(data, sort_key="name", jsonify=False, gsheet=False):
           owned = "access_user"
         else:
           owned = "access_none"
-        oscplike = "oscplike" if entry["oscplike"] else "notoscplike"
+        oscplike = "oscplike" if entry.get("oscplike") and entry["oscplike"] else "notoscplike"
         rows.append("%s.___%s___%s___%s___%s___%s___%s___%s___%s" % (
         idx+1,
         mid,
@@ -415,7 +415,7 @@ def show_machines(data, sort_key="name", jsonify=False, gsheet=False):
           owned = "access_user"
         else:
           owned = "access_none"
-        oscplike = "oscplike" if entry["oscplike"] else "notoscplike"
+        oscplike = "oscplike" if entry.get("oscplike") and entry["oscplike"] else "notoscplike"
         rows.append("%s.___%s___%s___%s___%s___%s___%s___%s___%s___%s" % (
         idx+1,
         mid,
@@ -443,7 +443,7 @@ def show_machines(data, sort_key="name", jsonify=False, gsheet=False):
           owned = "access_user"
         else:
           owned = "access_none"
-        oscplike = "oscplike" if entry["oscplike"] else "notoscplike"
+        oscplike = "oscplike" if entry.get("oscplike") and entry["oscplike"] else "notoscplike"
         rows.append("%s.___%s___%s___%s___%s___%s___%s___%s" % (
         idx+1,
         mid,
