@@ -455,7 +455,7 @@ class MachinesCLI:
     self._update_ippsec()
     self._update_oscplike(fullupdate=fullupdate)
 
-    #utils.show_machines(self.stats["machines"], jsonify=self.jsonify, gsheet=self.gsheet)
+    utils.show_machines(self.stats["machines"], jsonify=self.jsonify, gsheet=self.gsheet)
 
   def counts(self):
     if self.jsonify:
