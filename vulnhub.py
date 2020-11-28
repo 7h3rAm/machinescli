@@ -269,8 +269,6 @@ class VulnHub:
       pages = re.findall(r'<a href="/entry/[^"]+', res.text)
       if pages:
         machineurls = ["%s%s" % (self.baseurl, x.split('"', 2)[1].replace("/entry/", "entry/")) for x in pages]
-      if len(machineurls):
-        utils.debug("found %d machines on VulnHub" % (len(machineurls)))
 
     return machineurls
 

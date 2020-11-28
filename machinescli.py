@@ -26,6 +26,9 @@ class MachinesCLI:
     self.ownedfile = "%s/toolbox/bootstrap/owned" % (utils.expand_env(var="$HOME"))
     self.ownedlist = utils.load_file(self.ownedfile)
 
+    self.oscplikefile = "%s/toolbox/bootstrap/oscplike" % (utils.expand_env(var="$HOME"))
+    self.oscplikelist = utils.load_file(self.oscplikefile)
+
     self.statsfile = "%s/toolbox/bootstrap/machines.json" % (utils.expand_env(var="$HOME"))
     self.stats = utils.load_json(self.statsfile)
 
@@ -78,10 +81,6 @@ class MachinesCLI:
 
     self.vhcsvfile = "/tmp/oscplike.vh.csv"
     self.htbcsvfile = "/tmp/oscplike.htb.csv"
-    self.olsearchkeys = {
-      "htb": None,
-      "vh": None,
-    }
 
     self.points2difficulty = {
       10: "warmup",
@@ -96,23 +95,84 @@ class MachinesCLI:
       "la casa de papel": "lacasadepapel",
     }
 
+  def _do_count(self):
+    self.stats["counts"]["htbnix"] = len(self._json_query('.machines[] | select(.infrastructure == "hackthebox" and .os and .os != "Windows") | .url'))
+    self.stats["counts"]["htboscplike"] = len(self._json_query('.machines[] | select(.infrastructure == "hackthebox" and .oscplike) | .url'))
+    self.stats["counts"]["htbwindows"] = len(self._json_query('.machines[] | select(.infrastructure == "hackthebox" and .os and .os == "Windows") | .url'))
+    self.stats["counts"]["oscplikenix"] = len(self._json_query('.machines[] | select(.oscplike and .os and .os != "Windows") | .url'))
+    self.stats["counts"]["oscplikewindows"] = len(self._json_query('.machines[] | select(.oscplike and .os and .os == "Windows") | .url'))
+    self.stats["counts"]["ownedhtb"] = len(self._json_query('.machines[] | select((.owned_user or .owned_root) and .infrastructure == "hackthebox") | .url'))
+    self.stats["counts"]["ownedhtbnix"] = len(self._json_query('.machines[] | select((.owned_user or .owned_root) and .infrastructure == "hackthebox" and .os and .os != "Windows") | .url'))
+    self.stats["counts"]["ownedhtboscplike"] = len(self._json_query('.machines[] | select((.owned_user or .owned_root) and .infrastructure == "hackthebox" and .oscplike) | .url'))
+    self.stats["counts"]["ownedhtbwindows"] = len(self._json_query('.machines[] | select((.owned_user or .owned_root) and .infrastructure == "hackthebox" and .os and .os == "Windows") | .url'))
+    self.stats["counts"]["ownednix"] = len(self._json_query('.machines[] | select((.owned_user or .owned_root) and .os and .os != "Windows") | .url'))
+    self.stats["counts"]["ownedoscplike"] = len(self._json_query('.machines[] | select((.owned_user or .owned_root) and .oscplike) | .url'))
+    self.stats["counts"]["ownedoscplikenix"] = len(self._json_query('.machines[] | select((.owned_user or .owned_root) and .oscplike and .os and .os != "Windows") | .url'))
+    self.stats["counts"]["ownedoscplikewindows"] = len(self._json_query('.machines[] | select((.owned_user or .owned_root) and .oscplike and .os and .os == "Windows") | .url'))
+    self.stats["counts"]["ownedthm"] = len(self._json_query('.machines[] | select((.owned_user or .owned_root) and .infrastructure == "tryhackme") | .url'))
+    self.stats["counts"]["ownedthmnix"] = len(self._json_query('.machines[] | select((.owned_user or .owned_root) and .infrastructure == "tryhackme" and .os and .os != "Windows") | .url'))
+    self.stats["counts"]["ownedthmoscplike"] = len(self._json_query('.machines[] | select((.owned_user or .owned_root) and .infrastructure == "tryhackme" and .oscplike) | .url'))
+    self.stats["counts"]["ownedthmwindows"] = len(self._json_query('.machines[] | select((.owned_user or .owned_root) and .infrastructure == "tryhackme" and .os and .os == "Windows") | .url'))
+    self.stats["counts"]["ownedtotal"] = len(self._json_query('.machines[] | select(.owned_user or .owned_root) | .url'))
+    self.stats["counts"]["ownedvh"] = len(self._json_query('.machines[] | select((.owned_user or .owned_root) and .infrastructure == "vulnhub") | .url'))
+    self.stats["counts"]["ownedvhnix"] = len(self._json_query('.machines[] | select((.owned_user or .owned_root) and .infrastructure == "vulnhub" and .os and .os != "Windows") | .url'))
+    self.stats["counts"]["ownedvhoscplike"] = len(self._json_query('.machines[] | select((.owned_user or .owned_root) and .infrastructure == "vulnhub" and .oscplike) | .url'))
+    self.stats["counts"]["ownedvhwindows"] = len(self._json_query('.machines[] | select((.owned_user or .owned_root) and .infrastructure == "vulnhub" and .os and .os == "Windows") | .url'))
+    self.stats["counts"]["ownedwindows"] = len(self._json_query('.machines[] | select((.owned_user or .owned_root) and .os and .os == "Windows") | .url'))
+    self.stats["counts"]["thmnix"] = len(self._json_query('.machines[] | select(.infrastructure == "tryhackme" and .os and .os != "Windows") | .url'))
+    self.stats["counts"]["thmoscplike"] = len(self._json_query('.machines[] | select(.infrastructure == "tryhackme" and .oscplike) | .oscplike'))
+    self.stats["counts"]["thmwindows"] = len(self._json_query('.machines[] | select(.infrastructure == "tryhackme" and .os and .os == "Windows") | .url'))
+    self.stats["counts"]["totalhtb"] = len(self._json_query('.machines[] | select(.infrastructure == "hackthebox") | .url'))
+    self.stats["counts"]["totalnix"] = len(self._json_query('.machines[] | select(.os and .os != "Windows") | .url'))
+    self.stats["counts"]["totaloscplike"] = len(self._json_query('.machines[] | select(.oscplike) | .url'))
+    self.stats["counts"]["totalthm"] = len(self._json_query('.machines[] | select(.infrastructure == "tryhackme") | .url'))
+    self.stats["counts"]["totaltotal"] = len(self._json_query('.machines[] | .url'))
+    self.stats["counts"]["totalvh"] = len(self._json_query('.machines[] | select(.infrastructure == "vulnhub") | .url'))
+    self.stats["counts"]["totalwindows"] = len(self._json_query('.machines[] | select(.os and .os == "Windows") | .url'))
+    self.stats["counts"]["vhnix"] = len(self._json_query('.machines[] | select(.infrastructure == "vulnhub" and .os and .os != "Windows") | .url'))
+    self.stats["counts"]["vhoscplike"] = len(self._json_query('.machines[] | select(.infrastructure == "vulnhub" and .oscplike) | .oscplike'))
+    self.stats["counts"]["vhwindows"] = len(self._json_query('.machines[] | select(.infrastructure == "vulnhub" and .os and .os == "Windows") | .url'))
+    self.stats["counts"]["perhtb"] = (self.stats["counts"]["ownedhtb"]/self.stats["counts"]["totalhtb"])*100 if self.stats["counts"]["totalhtb"] else 0
+    self.stats["counts"]["perhtbnix"] = (self.stats["counts"]["ownedhtbnix"]/self.stats["counts"]["htbnix"])*100 if self.stats["counts"]["htbnix"] else 0
+    self.stats["counts"]["perhtboscplike"] = (self.stats["counts"]["ownedhtboscplike"]/self.stats["counts"]["htboscplike"])*100 if self.stats["counts"]["htboscplike"] else 0
+    self.stats["counts"]["perhtbwindows"] = (self.stats["counts"]["ownedhtbwindows"]/self.stats["counts"]["htbwindows"])*100 if self.stats["counts"]["htbwindows"] else 0
+    self.stats["counts"]["pernix"] = (self.stats["counts"]["ownednix"]/self.stats["counts"]["totalnix"])*100 if self.stats["counts"]["totalnix"] else 0
+    self.stats["counts"]["peroscplike"] = (self.stats["counts"]["ownedoscplike"]/self.stats["counts"]["totaloscplike"])*100 if self.stats["counts"]["totaloscplike"] else 0
+    self.stats["counts"]["peroscplikenix"] = (self.stats["counts"]["ownedoscplikenix"]/self.stats["counts"]["oscplikenix"])*100 if self.stats["counts"]["oscplikenix"] else 0
+    self.stats["counts"]["peroscplikewindows"] = (self.stats["counts"]["ownedoscplikewindows"]/self.stats["counts"]["oscplikewindows"])*100 if self.stats["counts"]["oscplikewindows"] else 0
+    self.stats["counts"]["perthm"] = (self.stats["counts"]["ownedthm"]/self.stats["counts"]["totalthm"])*100 if self.stats["counts"]["totalthm"] else 0
+    self.stats["counts"]["perthmnix"] = (self.stats["counts"]["ownedthmnix"]/self.stats["counts"]["thmnix"])*100 if self.stats["counts"]["thmnix"] else 0
+    self.stats["counts"]["perthmoscplike"] = (self.stats["counts"]["ownedthmoscplike"]/self.stats["counts"]["thmoscplike"])*100 if self.stats["counts"]["thmoscplike"] else 0
+    self.stats["counts"]["perthmwindows"] = (self.stats["counts"]["ownedthmwindows"]/self.stats["counts"]["thmwindows"])*100 if self.stats["counts"]["thmwindows"] else 0
+    self.stats["counts"]["pertotal"] = (self.stats["counts"]["ownedtotal"]/self.stats["counts"]["totaltotal"])*100 if self.stats["counts"]["totaltotal"] else 0
+    self.stats["counts"]["pervh"] = (self.stats["counts"]["ownedvh"]/self.stats["counts"]["totalvh"])*100 if self.stats["counts"]["totalvh"] else 0
+    self.stats["counts"]["pervhnix"] = (self.stats["counts"]["ownedvhnix"]/self.stats["counts"]["vhnix"])*100 if self.stats["counts"]["vhnix"] else 0
+    self.stats["counts"]["pervhoscplike"] = (self.stats["counts"]["ownedvhoscplike"]/self.stats["counts"]["vhoscplike"])*100 if self.stats["counts"]["vhoscplike"] else 0
+    self.stats["counts"]["pervhwindows"] = (self.stats["counts"]["ownedvhwindows"]/self.stats["counts"]["vhwindows"])*100 if self.stats["counts"]["vhwindows"] else 0
+    self.stats["counts"]["perwindows"] = (self.stats["counts"]["ownedwindows"]/self.stats["counts"]["totalwindows"])*100 if self.stats["counts"]["totalwindows"] else 0
+
   def _save_stats(self):
+    self._do_count()
     utils.save_json(self.stats, self.statsfile)
-    utils.debug("saved stats for %d machines to '%s'" % (self.stats["counts"]["totaltotal"], self.statsfile))
 
   def _reload_stats(self):
     self.stats = utils.load_json(self.statsfile)
-    utils.debug("reloaded stats for %d machines from '%s'" % (len(self.stats["counts"]["totaltotal"]), self.statsfile))
 
   def _save_owned(self):
     self.ownedlist = sorted(list(set(filter(None, self.ownedlist))))
     utils.save_file(self.ownedlist, self.ownedfile)
-    utils.debug("saved owned list with %d entries to '%s'" % (len(self.ownedlist), self.ownedfile))
 
   def _reload_owned(self):
     self.ownedlist = utils.load_file(self.ownedfile)
     self.ownedlist = sorted(list(set(filter(None, self.ownedlist))))
-    utils.debug("reloaded owned list with %d entries from '%s'" % (len(self.ownedlist), self.ownedfile))
+
+  def _save_oscplike(self):
+    self.oscplikelist = sorted(list(set(filter(None, self.oscplikelist))))
+    utils.save_file(self.oscplikelist, self.oscplikefile)
+
+  def _reload_oscplike(self):
+    self.oscplikelist = utils.load_file(self.oscplikefile)
+    self.oscplikelist = sorted(list(set(filter(None, self.oscplikelist))))
 
   def _filter_machines(self, valuelist, infrastructure="any", key=None):
     results, matched = [], []
@@ -183,14 +243,13 @@ class MachinesCLI:
 
     return results
 
-  def json_query(self, query):
+  def _json_query(self, query):
     try:
       return jq.compile(query).input(self.stats).all()
     except:
       return []
 
   def _update_ippsec(self):
-    utils.info("updating ippsec writeup descriptions...")
     self.ipsc = {
       "url": "https://ippsec.rocks/dataset.json",
       "count": 0,
@@ -218,556 +277,185 @@ class MachinesCLI:
       else:
         self.ipsc["entries"][name]["description"][desc] = tsurl
     if len(self.ipsc["entries"]):
-      utils.info("got descriptions for %d writeup videos" % (self.ipsc["count"]))
+      for machine in self.stats["machines"]:
+        if self.ipsc and self.ipsc.get("entries") and self.ipsc["entries"]:
+          for entry in self.ipsc["entries"]:
+            if machine["infrastructure"] in entry.lower().strip() and machine["name"].lower().strip() in entry.lower().strip():
+              machine["writeups"] = {
+                "ippsec": {
+                  "name": entry,
+                  "video_url": self.ipsc["entries"][entry]["video_url"],
+                  "description": self.ipsc["entries"][entry]["description"],
+                }
+              }
+      utils.info("[update.ippsec] added %d machine writeup descriptions from ippsec" % (self.ipsc["count"]))
 
-  def _update_oscplike(self):
-    utils.info("updating oscplike tryhackme machines list...")
-    self.olsearchkeys["thm"] = []
-    # https://docs.google.com/spreadsheets/d/1zYQOcr2h2VnRelm0Unx9Sg0Qg1MYDWUg/edit#gid=948740074
-    self.olsearchkeys["thm"] += ["https://tryhackme.com/room/0day"]
-    self.olsearchkeys["thm"] += ["https://tryhackme.com/room/cherryblossom"]
-    self.olsearchkeys["thm"] += ["https://tryhackme.com/room/internal"]
-    self.olsearchkeys["thm"] += ["https://tryhackme.com/room/jacobtheboss"]
-    self.olsearchkeys["thm"] += ["https://tryhackme.com/room/jeff"]
-    self.olsearchkeys["thm"] += ["https://tryhackme.com/room/marketplace"]
-    self.olsearchkeys["thm"] += ["https://tryhackme.com/room/mindgames"]
-    self.olsearchkeys["thm"] += ["https://tryhackme.com/room/theblobblog"]
-    self.olsearchkeys["thm"] += ["https://tryhackme.com/room/ultratech1"]
-    self.olsearchkeys["thm"] += ["https://tryhackme.com/room/wwbuddy"]
-    self.olsearchkeys["thm"] += ["https://tryhackme.com/room/yearofthedog"]
-    # curated from thm pentest path
-    self.olsearchkeys["thm"] += ["https://tryhackme.com/room/alfred"]
-    self.olsearchkeys["thm"] += ["https://tryhackme.com/room/attacktivedirectory"]
-    self.olsearchkeys["thm"] += ["https://tryhackme.com/room/blaster"]
-    self.olsearchkeys["thm"] += ["https://tryhackme.com/room/blue"]
-    self.olsearchkeys["thm"] += ["https://tryhackme.com/room/blueprint"]
-    self.olsearchkeys["thm"] += ["https://tryhackme.com/room/brainpan"]
-    self.olsearchkeys["thm"] += ["https://tryhackme.com/room/brainstorm"]
-    self.olsearchkeys["thm"] += ["https://tryhackme.com/room/bufferoverflowprep"]
-    self.olsearchkeys["thm"] += ["https://tryhackme.com/room/corp"]
-    self.olsearchkeys["thm"] += ["https://tryhackme.com/room/dailybugle"]
-    self.olsearchkeys["thm"] += ["https://tryhackme.com/room/gamezone"]
-    self.olsearchkeys["thm"] += ["https://tryhackme.com/room/gatekeeper"]
-    self.olsearchkeys["thm"] += ["https://tryhackme.com/room/hackpark"]
-    self.olsearchkeys["thm"] += ["https://tryhackme.com/room/introexploitdevelopment"]
-    self.olsearchkeys["thm"] += ["https://tryhackme.com/room/kenobi"]
-    self.olsearchkeys["thm"] += ["https://tryhackme.com/room/linuxprivesc"]
-    self.olsearchkeys["thm"] += ["https://tryhackme.com/room/lordoftheroot"]
-    self.olsearchkeys["thm"] += ["https://tryhackme.com/room/mrrobot"]
-    self.olsearchkeys["thm"] += ["https://tryhackme.com/room/powershell"]
-    self.olsearchkeys["thm"] += ["https://tryhackme.com/room/retro"]
-    self.olsearchkeys["thm"] += ["https://tryhackme.com/room/skynet"]
-    self.olsearchkeys["thm"] += ["https://tryhackme.com/room/steelmountain"]
-    self.olsearchkeys["thm"] += ["https://tryhackme.com/room/tomghost"]
-    self.olsearchkeys["thm"] += ["https://tryhackme.com/room/tonythetiger"]
-    self.olsearchkeys["thm"] += ["https://tryhackme.com/room/vulnversity"]
-    self.olsearchkeys["thm"] += ["https://tryhackme.com/room/windows10privesc"]
-    self.olsearchkeys["thm"] += ["https://tryhackme.com/room/windowsprivescarena"]
-    utils.debug("found %d entries for oscplike tryhackme machines" % (len(self.olsearchkeys["thm"])))
-
-    # get listing of oscplike htb machines
-    self.olsearchkeys["htb"] = []
-    self.olsearchkeys["htb"] += ["remote", "sauna", "servmon", "traceback"] # https://medium.com/@peregerinebunny/my-oscp-journey-d3addc26f07b
-    self.olsearchkeys["htb"] += ["heist"] # https://medium.com/@bondo.mike/htb-heist-390c079a20e5
-    self.olsearchkeys["htb"] += ["cache", "jeeves", "lame", "legacy", "passage"] # https://docs.google.com/spreadsheets/d/1zYQOcr2h2VnRelm0Unx9Sg0Qg1MYDWUg/edit#gid=683089738
-    utils.info("updating oscplike hackthebox machines list...")
-    self.olsearchkeys["htb"] = list(set(self.olsearchkeys["htb"]))
-    utils.download("https://docs.google.com/spreadsheets/d/1dwSMIAPIam0PuRBkCiDI88pU3yzrqqHkDtBngUHNCw8/export?format=csv&gid=1839402159", self.htbcsvfile)
-    utils.debug("saved tjnull's oscplike hackthebox machines list to '%s'" % (self.htbcsvfile))
-    with open(self.htbcsvfile) as fp: htbdata = fp.read()
-    lines = htbdata.split("\n")
-    for line in lines[5:]:
-      for token in line.split(",", 3):
-        if token and token != "":
-          token = token.lower().replace(" [linux]", "").replace(" [windows]", "").strip()
-          token = self.corrections[token] if token in self.corrections else token
-          self.olsearchkeys["htb"].append(token)
-    utils.debug("found %d entries for oscplike hackthebox machines" % (len(self.olsearchkeys["htb"])))
-
-    # get listing of oscplike vulnhub machines
-    self.olsearchkeys["vh"] = []
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/photographer-1,519/"]
-    # https://www.abatchy.com/2017/02/oscp-like-vulnhub-vms
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/devrandom-scream,47/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/brainpan-1,51/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/fristileaks-13,133/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/hacklab-vulnix,48/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/imf-1,162/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/kioptrix-2014-5,62/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/kioptrix-level-1-1,22/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/kioptrix-level-11-2,23/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/kioptrix-level-12-3,24/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/kioptrix-level-13-4,25/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/mr-robot-1,151/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/pwnlab-init,158/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/pwnos-20-pre-release,34/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/sickos-12,144/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/skytower-1,96/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/stapler-1,150/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/vulnos-2,147/"]
-    # https://zayotic.com/posts/oscp-like-vulnhub-vms/
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/basic-pentesting-1,216/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/basic-pentesting-2,241/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/born2root-1,197/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/born2root-2,291/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/brainpan-1,51/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/brainpan-2,56/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/brainpan-3,121/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/breach-1,152/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/breach-21,159/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/breach-301,177/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/covfefe-1,199/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/darknet-10,120/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/dc-1-1,292/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/dc-2,311/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/dc-3,312/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/dc-4,313/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/dc-5,314/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/dc-6,315/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/derpnstink-1,221/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/devrandom-scream,47/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/devrandom-sleepy,123/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/digitalworldlocal-bravery,281/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/digitalworldlocal-development,280/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/digitalworldlocal-mercy-v2,263/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/dina-101,200/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/droopy-v02,143/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/fowsniff-1,262/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/fristileaks-13,133/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/hackinos-1,295/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/hacklab-vulnix,48/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/haste-1,203/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/imf-1,162/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/kioptrix-2014-5,62/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/kioptrix-level-1-1,22/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/kioptrix-level-11-2,23/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/kioptrix-level-12-3,24/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/kioptrix-level-13-4,25/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/lazysysadmin-1,205/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/linsecurity-1,244/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/lord-of-the-root-101,129/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/mr-robot-1,151/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/nineveh-v03,222/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/node-1,252/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/pwnlab-init,158/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/pwnlab-init,158/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/pwnos-20-pre-release,34/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/raven-1,256/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/raven-2,269/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/rickdiculouslyeasy-1,207/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/sickos-11,132/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/sickos-12,144/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/sickos-12,144/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/skytower-1,96/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/smashthetux-101,138/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/solidstate-1,261/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/stapler-1,150/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/symfonos-1,322/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/toppo-1,245/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/vulnos-2,147/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/wakanda-1,251/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/wintermute-1,239/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/xtreme-vulnerable-web-application-xvwa-1,209/"]
-    # https://docs.google.com/spreadsheets/d/1zYQOcr2h2VnRelm0Unx9Sg0Qg1MYDWUg/edit#gid=566064791
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/assertion-101,495/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/bob-101,226/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/breach-1,152/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/breach-21,159/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/breach-301,177/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/dc-8,367/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/dc-9,412/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/depth-1,213/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/djinn-1,397/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/evm-1,391/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/five86-2,418/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/gitroot-1,488/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/goldeneye-1,240/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/greenoptic-1,510/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/hacker-fest-2019,378/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/hackme-1,330/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/lampiao-1,249/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/lemonsqueezy-1,473/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/misdirection-1,371/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/my-cmsms-1,498/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/nullbyte-1,126/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/pinkys-palace-v1,225/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/pinkys-palace-v2,229/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/powergrid-101,485/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/presidential-1,500/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/sar-1,425/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/scarecrow-11,354/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/sunset-decoy,505/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/sunset-midnight,517/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/sunset-midnight,517/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/sunset-twilight,512/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/symfonos-2,331/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/symfonos-31,332/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/symfonos-4,347/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/ted-1,327/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/temple-of-doom-1,243/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/tommy-boy-1,157/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/tr0ll-2,107/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/tre-1,483/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/w34kn3ss-1,270/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/web-developer-1,288/"]
-    self.olsearchkeys["vh"] += ["https://www.vulnhub.com/entry/zico2-1,210/"]
-    utils.info("updating oscplike vulnhub machines list...")
-    self.olsearchkeys["vh"] = list(set(self.olsearchkeys["vh"]))
-    utils.download("https://docs.google.com/spreadsheets/d/1dwSMIAPIam0PuRBkCiDI88pU3yzrqqHkDtBngUHNCw8/export?format=csv&gid=0", self.vhcsvfile)
-    utils.debug("saved tjnull's oscplike vulnhub machines list to '%s'" % (self.vhcsvfile))
-    with open(self.vhcsvfile) as fp: vhdata = fp.read()
-    lines = vhdata.split("\n")
-    for line in lines[5:]:
-      celldata = line.replace('",', '"___')
-      for entry in celldata.split("___"):
-        if not entry: continue
-        match = re.search(r'vulnhub\.com/entry/(.+),(\d+)', entry)
-        if match:
-          name, mid, url = match.groups()[0], int(match.groups()[1]), "https://www.vulnhub.com/entry/%s,%s/" % (match.groups()[0], match.groups()[1])
-          self.olsearchkeys["vh"].append(url)
-    utils.debug("found %d entries for oscplike vulnhub machines" % (len(self.olsearchkeys["vh"])))
-
-  def _refresh_htb_owned(self):
-    # get owned list from htb api
-    owned = self._filter_machines([x["id"] for x in self.htbapi.machines_owns()], infrastructure="htb")
-    # add all owned htb machines to in-memory owned list
-    self.ownedlist.extend([x["url"] for x in owned])
-    # dedup ownedlist
-    self.ownedlist = sorted(list(set(self.ownedlist)))
-    # save the updated owned list locally and refreh in-memory list
-    self._save_owned()
-    return owned
-
-  def _update_hackthebox(self, stats):
-    utils.info("updating hackthebox machines...")
-    # use this opportunity to refresh htb results for owned machines
-    owned = self._refresh_htb_owned()
-    difficulty = self.htbapi.machines_difficulty()
-    for machine in self.htbapi.machines_get_all():
-      matchdict = machine
-      del matchdict["avatar_thumb"]
-      matchdict["infrastructure"] = "hackthebox"
-      matchdict["verbose_id"] = "hackthebox#%d" % (matchdict["id"])
-      matchdict["difficulty"] = self.points2difficulty[machine["points"]]
-      matchdict["shortname"] = machine["name"].lower().strip()
-      matchdict["matrix"] = self.htbapi.machines_get_matrix(matchdict["id"]); del matchdict["matrix"]["success"]
-      matchdict["oscplike"] = True if matchdict["shortname"] in self.olsearchkeys["htb"] else False
-      matchdict["url"] = "https://www.hackthebox.eu/home/machines/profile/%d" % (machine["id"])
-      matchdict["owned_user"], matchdict["owned_root"] = False, False
-      for entry in self.ownedlist:
-        if entry.lower().strip() == matchdict["url"].lower().strip():
-          matchdict["owned_user"], matchdict["owned_root"] = True, True
-          break
-      matchdict["difficulty_ratings"] = None
-      for entry in difficulty:
-        if entry["id"] == matchdict["id"]:
-          matchdict["difficulty_ratings"] = entry["difficulty_ratings"] if entry["difficulty_ratings"] else []
-      for entry in self.ipsc["entries"]:
-        if matchdict["infrastructure"] in entry.lower().strip() and matchdict["name"].lower().strip() in entry.lower().strip():
-          matchdict["writeups"] = {
-            "ippsec": {
-              "name": entry,
-              "video_url": self.ipsc["entries"][entry]["video_url"],
-              "description": self.ipsc["entries"][entry]["description"],
-            }
-          }
-
-      stats["counts"]["totaltotal"] += 1
-      stats["counts"]["totalhtb"] += 1
-
-      if matchdict["oscplike"]:
-        stats["counts"]["totaloscplike"] += 1
-        stats["counts"]["htboscplike"] += 1
-
-      if matchdict["os"]:
-        if matchdict["os"].lower() == "windows":
-          stats["counts"]["totalwindows"] += 1
-          stats["counts"]["htbwindows"] += 1
-          if matchdict["oscplike"]:
-            stats["counts"]["oscplikewindows"] += 1
-        else:
-          stats["counts"]["totalnix"] += 1
-          stats["counts"]["htbnix"] += 1
-          if matchdict["oscplike"]:
-            stats["counts"]["oscplikenix"] += 1
-
-      if matchdict["owned_user"] or matchdict["owned_root"]:
-        stats["counts"]["ownedhtb"] += 1
-        stats["counts"]["ownedtotal"] += 1
-        if matchdict["os"] and matchdict["os"].lower() != "windows":
-          stats["counts"]["ownedhtbnix"] += 1
-          stats["counts"]["ownednix"] += 1
-        if matchdict["os"] and matchdict["os"].lower() == "windows":
-          stats["counts"]["ownedhtbwindows"] += 1
-          stats["counts"]["ownedwindows"] += 1
-        if matchdict["oscplike"]:
-          stats["counts"]["ownedhtboscplike"] += 1
-          stats["counts"]["ownedoscplike"] += 1
-        if matchdict["oscplike"] and matchdict["os"] and matchdict["os"].lower() != "windows":
-          stats["counts"]["ownedoscplikenix"] += 1
-        if matchdict["oscplike"] and matchdict["os"] and matchdict["os"].lower() == "windows":
-          stats["counts"]["ownedoscplikewindows"] += 1
+  def _update_oscplike(self, fullupdate=False):
+    self._reload_oscplike()
+    if fullupdate:
+      utils.download("https://docs.google.com/spreadsheets/d/1dwSMIAPIam0PuRBkCiDI88pU3yzrqqHkDtBngUHNCw8/export?format=csv&gid=1839402159", self.htbcsvfile)
+      with open(self.htbcsvfile) as fp: htbdata = fp.read()
+      lines = htbdata.split("\n")
+      htboscplike = []
+      for line in lines[5:]:
+        for token in line.split(",", 3):
+          if token and token != "":
+            token = token.lower().replace(" [linux]", "").replace(" [windows]", "").strip()
+            token = self.corrections[token] if token in self.corrections else token
   
-      stats["machines"].append(matchdict)
-    utils.info("found %d hackthebox machines" % (stats["counts"]["totalhtb"]))
-    return stats
+            # token is a name, find url from self.stats
+            query = '.machines[] | select(.infrastructure == "hackthebox" and .shortname == "%s") | .url' % (token)
+            result = self._json_query(query)
+            if result and len(result):
+              htboscplike.append(result[0])
+      self.oscplikelist += htboscplike
+      utils.download("https://docs.google.com/spreadsheets/d/1dwSMIAPIam0PuRBkCiDI88pU3yzrqqHkDtBngUHNCw8/export?format=csv&gid=0", self.vhcsvfile)
+      with open(self.vhcsvfile) as fp: vhdata = fp.read()
+      lines = vhdata.split("\n")
+      vhoscplike = []
+      for line in lines[5:]:
+        celldata = line.replace('",', '"___')
+        for entry in celldata.split("___"):
+          if not entry: continue
+          match = re.search(r'vulnhub\.com/entry/(.+),(\d+)', entry)
+          if match:
+            name, mid, url = match.groups()[0], int(match.groups()[1]), "https://www.vulnhub.com/entry/%s,%s/" % (match.groups()[0], match.groups()[1])
+            vhoscplike.append(token)
+      self.oscplikelist += vhoscplike
+    self._save_oscplike()
+    utils.info("[update.oscplike] added %d oscplike machines from various sources" % (len(self.oscplikelist)))
 
-  def _update_vulnhub(self, stats):
-    utils.info("updating vulnhub machines...")
-    self._reload_owned()
-    for machine in self.vhapi.get_all_machine_stats():
-      if not machine["name"]:
-        continue
-      matchdict = machine
-      del matchdict["avatar_thumb"]
-      matchdict["infrastructure"] = "vulnhub"
-      matchdict["verbose_id"] = "vulnhub#%d" % (matchdict["id"])
-      matchdict["difficulty"] = self.points2difficulty[machine["points"]] if machine["points"] else None
-      matchdict["shortname"] = machine["name"].lower().strip()
-      matchdict["oscplike"] = True if matchdict["url"] in self.olsearchkeys["vh"] else False
-      matchdict["owned_user"], matchdict["owned_root"] = False, False
-      for entry in self.ownedlist:
-        if entry.lower().strip() == matchdict["url"].lower().strip():
-          matchdict["owned_user"], matchdict["owned_root"] = True, True
-          break
-      matchdict["difficulty_ratings"] = None
-      for entry in self.ipsc["entries"]:
-        if matchdict["infrastructure"] in entry.lower().strip() and matchdict["name"].lower().strip() in entry.lower().strip():
-          matchdict["writeups"] = {
-            "ippsec": {
-              "name": entry,
-              "video_url": self.ipsc["entries"][entry]["video_url"],
-              "description": self.ipsc["entries"][entry]["description"],
-            }
-          }
-
-      stats["counts"]["totaltotal"] += 1
-      stats["counts"]["totalvh"] += 1
-
-      if matchdict["oscplike"]:
-        stats["counts"]["totaloscplike"] += 1
-        stats["counts"]["vhoscplike"] += 1
-
-      if matchdict["os"]:
-        if matchdict["os"].lower() == "windows":
-          stats["counts"]["totalwindows"] += 1
-          stats["counts"]["vhwindows"] += 1
-          if matchdict["oscplike"]:
-            stats["counts"]["oscplikewindows"] += 1
-        else:
-          stats["counts"]["totalnix"] += 1
-          stats["counts"]["vhnix"] += 1
-          if matchdict["oscplike"]:
-            stats["counts"]["oscplikenix"] += 1
-
-      if matchdict["owned_user"] or matchdict["owned_root"]:
-        stats["counts"]["ownedvh"] += 1
-        stats["counts"]["ownedtotal"] += 1
-        if matchdict["os"] and matchdict["os"].lower() != "windows":
-          stats["counts"]["ownedvhnix"] += 1
-          stats["counts"]["ownednix"] += 1
-        if matchdict["os"] and matchdict["os"].lower() == "windows":
-          stats["counts"]["ownedvhwindows"] += 1
-          stats["counts"]["ownedwindows"] += 1
-        if matchdict["oscplike"]:
-          stats["counts"]["ownedvhoscplike"] += 1
-          stats["counts"]["ownedoscplike"] += 1
-        if matchdict["oscplike"] and matchdict["os"] and matchdict["os"].lower() != "windows":
-          stats["counts"]["ownedoscplikenix"] += 1
-        if matchdict["oscplike"] and matchdict["os"] and matchdict["os"].lower() == "windows":
-          stats["counts"]["ownedoscplikewindows"] += 1
-
-      stats["machines"].append(machine)
-    utils.info("found %d vulnhub machines" % (stats["counts"]["totalvh"]))
-    return stats
-
-  def _update_tryhackme(self, stats):
-    utils.info("updating tryhackme machines...")
-    d2p = dict((v,k) for k,v in self.points2difficulty.items())
-    for room in self.thmapi.rooms():
-      matchdict = {
-        "description": room["description"],
-        "difficulty": room["difficulty"],
-        "difficulty_ratings": None,
-        "id": "tryhackme#%s" % (room["code"]),
-        "infrastructure": "tryhackme",
-        "maker": {
-          "id": None,
-          "name": room["creator"],
-          "url": None,
-        },
-        "name": room["title"],
-        "os": None,
-        "oscplike": None,
-        "owned_root": False,
-        "owned_user": False,
-        "points": d2p[room["difficulty"]],
-        "release": room["published"],
-        "series": {
-          "id": None,
-          "name": None,
-          "url": None,
-        },
-        "shortname": room["code"],
-        "url": "https://tryhackme.com/room/%s" % (room["code"]),
-        "verbose_id": "tryhackme#%s" % (room["code"]),
-      }
-
-      matchdict["oscplike"] = True if matchdict["url"] in self.olsearchkeys["thm"] else False
-      matchdict["owned_user"], matchdict["owned_root"] = False, False
-      for entry in self.ownedlist:
-        if entry.lower().strip() == matchdict["url"].lower().strip():
-          matchdict["owned_user"], matchdict["owned_root"] = True, True
-          break
-      matchdict["difficulty_ratings"] = None
-      for entry in self.ipsc["entries"]:
-        if matchdict["infrastructure"] in entry.lower().strip() and matchdict["name"].lower().strip() in entry.lower().strip():
-          matchdict["writeups"] = {
-            "ippsec": {
-              "name": entry,
-              "video_url": self.ipsc["entries"][entry]["video_url"],
-              "description": self.ipsc["entries"][entry]["description"],
-            }
-          }
-
-      stats["counts"]["totaltotal"] += 1
-      stats["counts"]["totalthm"] += 1
-
-      if matchdict["oscplike"]:
-        stats["counts"]["totaloscplike"] += 1
-        stats["counts"]["thmoscplike"] += 1
-
-      if matchdict["os"]:
-        if matchdict["os"].lower() == "windows":
-          stats["counts"]["totalwindows"] += 1
-          stats["counts"]["thmwindows"] += 1
-          if matchdict["oscplike"]:
-            stats["counts"]["oscplikewindows"] += 1
-        else:
-          stats["counts"]["totalnix"] += 1
-          stats["counts"]["thmnix"] += 1
-          if matchdict["oscplike"]:
-            stats["counts"]["oscplikenix"] += 1
-
-      if matchdict["owned_user"] or matchdict["owned_root"]:
-        stats["counts"]["ownedthm"] += 1
-        stats["counts"]["ownedtotal"] += 1
-        if matchdict["os"] and matchdict["os"].lower() != "windows":
-          stats["counts"]["ownedthmnix"] += 1
-          stats["counts"]["ownednix"] += 1
-        if matchdict["os"] and matchdict["os"].lower() == "windows":
-          stats["counts"]["ownedthmwindows"] += 1
-          stats["counts"]["ownedwindows"] += 1
-        if matchdict["oscplike"]:
-          stats["counts"]["ownedthmoscplike"] += 1
-          stats["counts"]["ownedoscplike"] += 1
-        if matchdict["oscplike"] and matchdict["os"] and matchdict["os"].lower() != "windows":
-          stats["counts"]["ownedoscplikenix"] += 1
-        if matchdict["oscplike"] and matchdict["os"] and matchdict["os"].lower() == "windows":
-          stats["counts"]["ownedoscplikewindows"] += 1
-
-      stats["machines"].append(matchdict)
-    utils.info("found %d tryhackme machines" % (stats["counts"]["totalthm"]))
-    return stats
-
-  def update(self):
-    stats = {
-      "counts": {
-        "htbnix": 0,
-        "htboscplike": 0,
-        "htbwindows": 0,
-        "oscplikenix": 0,
-        "oscplikewindows": 0,
-        "ownedhtb": 0,
-        "ownedhtbnix": 0,
-        "ownedhtboscplike": 0,
-        "ownedhtbwindows": 0,
-        "ownednix": 0,
-        "ownedoscplike": 0,
-        "ownedoscplikenix": 0,
-        "ownedoscplikewindows": 0,
-        "ownedthm": 0,
-        "ownedthmnix": 0,
-        "ownedthmoscplike": 0,
-        "ownedthmwindows": 0,
-        "ownedtotal": 0,
-        "ownedvh": 0,
-        "ownedvhnix": 0,
-        "ownedvhoscplike": 0,
-        "ownedvhwindows": 0,
-        "ownedwindows": 0,
-        "perhtb": 0,
-        "perhtbnix": 0,
-        "perhtboscplike": 0,
-        "perhtbwindows": 0,
-        "pernix": 0,
-        "peroscplike": 0,
-        "peroscplikenix": 0,
-        "peroscplikewindows": 0,
-        "perthm": 0,
-        "perthmnix": 0,
-        "perthmoscplike": 0,
-        "perthmwindows": 0,
-        "pertotal": 0,
-        "pervh": 0,
-        "pervhnix": 0,
-        "pervhoscplike": 0,
-        "pervhwindows": 0,
-        "perwindows": 0,
-        "thmnix": 0,
-        "thmoscplike": 0,
-        "thmwindows": 0,
-        "totalhtb": 0,
-        "totalnix": 0,
-        "totaloscplike": 0,
-        "totalthm": 0,
-        "totaltotal": 0,
-        "totalvh": 0,
-        "totalwindows": 0,
-        "vhnix": 0,
-        "vhoscplike": 0,
-        "vhwindows": 0,
-      },
-      "machines": [],
-    }
-
-    # useful metadata sources
-    self._update_ippsec()
-    self._update_oscplike()
-
-    # infrastructure/platform sources
-    stats = self._update_tryhackme(stats)
-    stats = self._update_hackthebox(stats)
-    stats = self._update_vulnhub(stats)
-
-    stats["counts"]["perthm"] = (stats["counts"]["ownedthm"]/stats["counts"]["totalthm"])*100 if stats["counts"]["totalthm"] else 0
-    stats["counts"]["perthmnix"] = (stats["counts"]["ownedthmnix"]/stats["counts"]["thmnix"])*100 if stats["counts"]["thmnix"] else 0
-    stats["counts"]["perthmwindows"] = (stats["counts"]["ownedthmwindows"]/stats["counts"]["thmwindows"])*100 if stats["counts"]["thmwindows"] else 0
-    stats["counts"]["perthmoscplike"] = (stats["counts"]["ownedthmoscplike"]/stats["counts"]["thmoscplike"])*100 if stats["counts"]["thmoscplike"] else 0
-
-    stats["counts"]["perhtb"] = (stats["counts"]["ownedhtb"]/stats["counts"]["totalhtb"])*100 if stats["counts"]["totalhtb"] else 0
-    stats["counts"]["perhtbnix"] = (stats["counts"]["ownedhtbnix"]/stats["counts"]["htbnix"])*100 if stats["counts"]["htbnix"] else 0
-    stats["counts"]["perhtbwindows"] = (stats["counts"]["ownedhtbwindows"]/stats["counts"]["htbwindows"])*100 if stats["counts"]["htbwindows"] else 0
-    stats["counts"]["perhtboscplike"] = (stats["counts"]["ownedhtboscplike"]/stats["counts"]["htboscplike"])*100 if stats["counts"]["htboscplike"] else 0
-
-    utils.to_json(stats["counts"])
-
-    stats["counts"]["pervh"] = (stats["counts"]["ownedvh"]/stats["counts"]["totalvh"])*100 if stats["counts"]["totalvh"] else 0
-    stats["counts"]["pervhnix"] = (stats["counts"]["ownedvhnix"]/stats["counts"]["vhnix"])*100 if stats["counts"]["vhnix"] else 0
-    stats["counts"]["pervhwindows"] = (stats["counts"]["ownedvhwindows"]/stats["counts"]["vhwindows"])*100 if stats["counts"]["vhwindows"] else 0
-    stats["counts"]["pervhoscplike"] = (stats["counts"]["ownedvhoscplike"]/stats["counts"]["vhoscplike"])*100 if stats["counts"]["vhoscplike"] else 0
-
-    stats["counts"]["peroscplike"] = (stats["counts"]["ownedoscplike"]/stats["counts"]["totaloscplike"])*100 if stats["counts"]["totaloscplike"] else 0
-    stats["counts"]["peroscplikenix"] = (stats["counts"]["ownedoscplikenix"]/stats["counts"]["oscplikenix"])*100 if stats["counts"]["oscplikenix"] else 0
-    stats["counts"]["peroscplikewindows"] = (stats["counts"]["ownedoscplikewindows"]/stats["counts"]["oscplikewindows"])*100 if stats["counts"]["oscplikewindows"] else 0
-
-    stats["counts"]["pernix"] = (stats["counts"]["ownednix"]/stats["counts"]["totalnix"])*100 if stats["counts"]["totalnix"] else 0
-    stats["counts"]["perwindows"] = (stats["counts"]["ownedwindows"]/stats["counts"]["totalwindows"])*100 if stats["counts"]["totalwindows"] else 0
-    stats["counts"]["pertotal"] = (stats["counts"]["ownedtotal"]/stats["counts"]["totaltotal"])*100 if stats["counts"]["totaltotal"] else 0
-
-    self.stats = stats
+  def _update_owned(self):
+    self.ownedlist.extend([x["url"] for x in self._filter_machines([x["id"] for x in self.htbapi.machines_owns()], infrastructure="htb")])
+    self._save_owned()
+    for machine in self.stats["machines"]:
+      if machine["url"] in self.ownedlist:
+        machine["owned_user"] = True
+        machine["owned_root"] = True
+      else:
+        machine["owned_user"] = False
+        machine["owned_root"] = False
     self._save_stats()
-    utils.show_machines(self.stats["machines"], jsonify=self.jsonify, gsheet=self.gsheet)
+    utils.info("[update.owned] updated owned stats for %d machines" % (len(self.ownedlist)))
+
+  def _update_hackthebox(self):
+    difficulty = self.htbapi.machines_difficulty()
+    machines = self.htbapi.machines_get_all()
+    htbmachines = {}
+    for machine in machines:
+      url = "https://www.hackthebox.eu/home/machines/profile/%d" % (machine["id"])
+      htbmachines[url] = machine
+    trackedhtb = self._json_query('.machines[] | select(.infrastructure == "hackthebox") | .url')
+    totalhtb = htbmachines.keys()
+    deltahtb = list(set(totalhtb) - set(trackedhtb))
+    utils.info("[update.hackthebox] tracked: %d, total: %d, delta: %d" % (len(trackedhtb), len(totalhtb), len(deltahtb)))
+    if len(deltahtb):
+      total = len(deltahtb)
+      for idx, deltaurl in enumerate(deltahtb):
+        print("[update.hackthebox][%d/%d] adding stats for %s" % (idx+1, total, deltaurl))
+        matchdict = htbmachines[deltaurl]
+        del matchdict["avatar_thumb"]
+        matchdict["infrastructure"] = "hackthebox"
+        matchdict["verbose_id"] = "hackthebox#%d" % (matchdict["id"])
+        matchdict["difficulty"] = self.points2difficulty[matchdict["points"]]
+        matchdict["shortname"] = matchdict["name"].lower().strip()
+        matchdict["matrix"] = self.htbapi.machines_get_matrix(matchdict["id"]); del matchdict["matrix"]["success"]
+        matchdict["url"] = "https://www.hackthebox.eu/home/machines/profile/%d" % (matchdict["id"])
+        matchdict["difficulty_ratings"] = None
+        for entry in difficulty:
+          if entry["id"] == matchdict["id"]:
+            matchdict["difficulty_ratings"] = entry["difficulty_ratings"] if entry["difficulty_ratings"] else []
+        self.stats["machines"].append(matchdict)
+      utils.info("[update.hackthebox] added %d new machines (total: %d)" % (len(deltahtb), len(self._json_query('.machines[] | select(.infrastructure == "hackthebox") | .url'))))
+
+  def _update_vulnhub(self):
+    urls = self.vhapi._get_all_machine_urls()
+    vhmachines = {}
+    for url in urls:
+      vhmachines[url] = None
+    trackedvh = self._json_query('.machines[] | select(.infrastructure == "vulnhub") | .url')
+    totalvh = vhmachines.keys()
+    deltavh = list(set(totalvh) - set(trackedvh))
+    utils.info("[update.vulnhub] tracked: %d, total: %d, delta: %d" % (len(trackedvh), len(totalvh), len(deltavh)))
+    if len(deltavh):
+      total = len(deltavh)
+      for idx, deltaurl in enumerate(deltavh):
+        print("[update.vulnhub][%d/%d] adding stats for %s" % (idx+1, total, deltaurl))
+        vhmachines[deltaurl] = self.vhapi._parse_machine_page(deltaurl)
+        matchdict = vhmachines[deltaurl]
+        if not matchdict["name"]:
+          continue
+        del matchdict["avatar_thumb"]
+        matchdict["infrastructure"] = "vulnhub"
+        matchdict["verbose_id"] = "vulnhub#%d" % (matchdict["id"])
+        matchdict["difficulty"] = self.points2difficulty[matchdict["points"]] if matchdict["points"] else None
+        matchdict["shortname"] = matchdict["name"].lower().strip()
+        matchdict["owned_user"], matchdict["owned_root"] = False, False
+        matchdict["difficulty_ratings"] = None
+        self.stats["machines"].append(matchdict)
+      utils.info("[update.vulnhub] added %d new machines (total: %d)" % (len(deltavh), len(self._json_query('.machines[] | select(.infrastructure == "vulnhub") | .url'))))
+
+  def _update_tryhackme(self):
+    rooms = self.thmapi.rooms()
+    thmrooms = {}
+    for room in rooms:
+      url = "https://tryhackme.com/room/%s" % (room["code"])
+      thmrooms[url] = room
+    trackedthm = self._json_query('.machines[] | select(.infrastructure == "tryhackme") | .url')
+    totalthm = thmrooms.keys()
+    deltathm = list(set(totalthm) - set(trackedthm))
+    utils.info("[update.tryhackme] tracked: %d, total: %d, delta: %d" % (len(trackedthm), len(totalthm), len(deltathm)))
+    if len(deltathm):
+      d2p = dict((v,k) for k,v in self.points2difficulty.items())
+      total = len(deltathm)
+      for idx, deltaurl in enumerate(deltathm):
+        print("[update.tryhackme][%d/%d] adding stats for %s" % (idx+1, total, deltaurl))
+        matchdict = {
+          "description": thmrooms[deltaurl]["description"],
+          "difficulty": thmrooms[deltaurl]["difficulty"],
+          "difficulty_ratings": None,
+          "id": "tryhackme#%s" % (thmrooms[deltaurl]["code"]),
+          "infrastructure": "tryhackme",
+          "maker": {
+            "id": None,
+            "name": thmrooms[deltaurl]["creator"],
+            "url": None,
+          },
+          "name": thmrooms[deltaurl]["title"],
+          "os": None,
+          "oscplike": None,
+          "owned_root": False,
+          "owned_user": False,
+          "points": d2p[thmrooms[deltaurl]["difficulty"]],
+          "release": thmrooms[deltaurl]["published"],
+          "series": {
+            "id": None,
+            "name": None,
+            "url": None,
+          },
+          "shortname": thmrooms[deltaurl]["code"],
+          "url": deltaurl,
+          "verbose_id": "tryhackme#%s" % (thmrooms[deltaurl]["code"]),
+        }
+        matchdict["difficulty_ratings"] = None
+        self.stats["machines"].append(matchdict)
+      utils.info("[update.tryhackme] added %d new machines (total: %d)" % (len(deltathm), len(self._json_query('.machines[] | select(.infrastructure == "tryhackme") | .url'))))
+
+  def update(self, fullupdate=False):
+    if fullupdate:
+      self.stats["machines"] = []
+
+    # fetch new machine stats from resp. platforms
+    self._update_tryhackme()
+    self._update_hackthebox()
+    self._update_vulnhub()
+
+    # for all machines, update owned/ippsec/oscplike stats
+    self._update_owned()
+    self._update_ippsec()
+    self._update_oscplike(fullupdate=fullupdate)
+
+    #utils.show_machines(self.stats["machines"], jsonify=self.jsonify, gsheet=self.gsheet)
 
   def counts(self):
     if self.jsonify:
@@ -817,7 +505,7 @@ class MachinesCLI:
     else:
       query = querystr.strip()
     if query:
-      utils.show_machines(self.json_query(query), jsonify=self.jsonify, gsheet=self.gsheet)
+      utils.show_machines(self._json_query(query), jsonify=self.jsonify, gsheet=self.gsheet)
 
   def search(self, searchkey):
     machines = self._filter_machines([searchkey], infrastructure="any", key="description")
@@ -844,12 +532,15 @@ class MachinesCLI:
       utils.error("found multiple (%d) machines for searchkey \"%s\"" % (len(matches), searchkey))
     else:
       for entry in matches:
-        self.ownedlist.append(entry["url"])
-        self._save_owned()
         if entry["infrastructure"] in ["htb", "hackthebox"]:
+          # submit flag to htb and show response
           resp = self.htbapi.machines_own(flag, entry["points"], entry["id"])
           utils.to_json(resp)
-      # based on api reponse, update machines.json
+        else:
+          # update machines.json: trust user for thm and vh
+          self.ownedlist.append(entry["url"])
+    # refresh owned stats, recount and update machines.json
+    self._update_owned()
 
   def htb_stats(self):
     stats = {
