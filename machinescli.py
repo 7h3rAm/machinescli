@@ -20,6 +20,7 @@ class MachinesCLI:
     self.vhapi = VulnHub()
     self.jsonify = False
     self.gsheet = False
+    self.showttps = False
 
     self.basedir = os.path.dirname(os.path.realpath(__file__))
 
@@ -233,7 +234,7 @@ class MachinesCLI:
               if value.lower().strip() in entry[key].lower().strip() and entry["verbose_id"] not in matched:
                 results.append(entry)
                 matched.append(entry["verbose_id"])
-            if entry.get("writeups"):
+            if entry.get("writeups") and entry["writeups"].get("ippsec"):
               for desc in entry["writeups"]["ippsec"]["description"]:
                 if value.lower().strip() in desc.lower() and entry["verbose_id"] not in matched:
                   results.append(entry)
@@ -455,7 +456,8 @@ class MachinesCLI:
     self._update_ippsec()
     self._update_oscplike(fullupdate=fullupdate)
 
-    utils.show_machines(self.stats["machines"], jsonify=self.jsonify, gsheet=self.gsheet)
+    # show latest counts
+    self.counts()
 
   def counts(self):
     if self.jsonify:
@@ -510,7 +512,7 @@ class MachinesCLI:
     else:
       query = querystr.strip()
     if query:
-      utils.show_machines(self._json_query(query), jsonify=self.jsonify, gsheet=self.gsheet)
+      utils.show_machines(self._json_query(query), jsonify=self.jsonify, gsheet=self.gsheet, showttps=self.showttps)
 
   def search(self, searchkey):
     machines = self._filter_machines([searchkey], infrastructure="any", key="description")
@@ -524,11 +526,11 @@ class MachinesCLI:
           machine["search_url"] = utils.yturl2verboseid(url)
           break
       results.append(machine)
-    utils.show_machines(machines, jsonify=self.jsonify, gsheet=self.gsheet)
+    utils.show_machines(machines, jsonify=self.jsonify, gsheet=self.gsheet, showttps=self.showttps)
 
   def info(self, searchkey):
     searchkeys = [searchkey] if searchkey.startswith("http") else [x.strip() for x in searchkey.split(",")]
-    utils.show_machines(self._filter_machines(searchkeys, infrastructure="any"), jsonify=self.jsonify, gsheet=self.gsheet)
+    utils.show_machines(self._filter_machines(searchkeys, infrastructure="any"), jsonify=self.jsonify, gsheet=self.gsheet, showttps=self.showttps)
 
   def own(self, args):
     searchkey, flag = args.split(",", 1)
@@ -556,22 +558,22 @@ class MachinesCLI:
     utils.to_json(stats)
 
   def htb_todos(self):
-    utils.show_machines(self._filter_machines([x["id"] for x in self.htbapi.machines_todo()], infrastructure="htb"), jsonify=self.jsonify, gsheet=self.gsheet)
+    utils.show_machines(self._filter_machines([x["id"] for x in self.htbapi.machines_todo()], infrastructure="htb"), jsonify=self.jsonify, gsheet=self.gsheet, showttps=self.showttps)
 
   def htb_assigned(self):
-    utils.show_machines(self._filter_machines([x["id"] for x in self.htbapi.machines_assigned()], infrastructure="htb"), jsonify=self.jsonify, gsheet=self.gsheet)
+    utils.show_machines(self._filter_machines([x["id"] for x in self.htbapi.machines_assigned()], infrastructure="htb"), jsonify=self.jsonify, gsheet=self.gsheet, showttps=self.showttps)
 
   def htb_owned(self):
-    utils.show_machines(self._filter_machines([x["id"] for x in self.htbapi.machines_owns()], infrastructure="htb"), jsonify=self.jsonify, gsheet=self.gsheet)
+    utils.show_machines(self._filter_machines([x["id"] for x in self.htbapi.machines_owns()], infrastructure="htb"), jsonify=self.jsonify, gsheet=self.gsheet, showttps=self.showttps)
 
   def htb_spawned(self):
-    utils.show_machines(self._filter_machines([x["id"] for x in self.htbapi.machines_spawned()], infrastructure="htb"), jsonify=self.jsonify, gsheet=self.gsheet)
+    utils.show_machines(self._filter_machines([x["id"] for x in self.htbapi.machines_spawned()], infrastructure="htb"), jsonify=self.jsonify, gsheet=self.gsheet, showttps=self.showttps)
 
   def htb_terminating(self):
-    utils.show_machines(self._filter_machines([x["id"] for x in self.htbapi.machines_terminating()], infrastructure="htb"), jsonify=self.jsonify, gsheet=self.gsheet)
+    utils.show_machines(self._filter_machines([x["id"] for x in self.htbapi.machines_terminating()], infrastructure="htb"), jsonify=self.jsonify, gsheet=self.gsheet, showttps=self.showttps)
 
   def htb_resetting(self):
-    utils.show_machines(self._filter_machines([x["id"] for x in self.htbapi.machines_resetting()], infrastructure="htb"), jsonify=self.jsonify, gsheet=self.gsheet)
+    utils.show_machines(self._filter_machines([x["id"] for x in self.htbapi.machines_resetting()], infrastructure="htb"), jsonify=self.jsonify, gsheet=self.gsheet, showttps=self.showttps)
 
   def htb_expiry(self):
     expirydict = self.htbapi.machines_expiry()
@@ -582,7 +584,7 @@ class MachinesCLI:
         if entry["id"] == machine["id"]:
           machine["expires_at"] = entry["expires_at"]
           results.append(machine)
-    utils.show_machines(results, jsonify=self.jsonify, gsheet=self.gsheet)
+    utils.show_machines(results, jsonify=self.jsonify, gsheet=self.gsheet, showttps=self.showttps)
 
   def htb_assign(self, searchkey):
     matches = self._filter_machines([searchkey], infrastructure="htb")
@@ -632,6 +634,7 @@ if __name__ == "__main__":
   ggroup = parser.add_mutually_exclusive_group()
   ggroup.add_argument('-j', '--jsonify', required=False, action='store_true', default=False, help='show raw json output (disable default tabular output)')
   ggroup.add_argument('-g', '--gsheet', required=False, action='store_true', default=False, help='show ghseet csv output (disable default tabular output)')
+  ggroup.add_argument('-t', '--showttps', required=False, action='store_true', default=False, help='show ttps if machine writeup is available')
 
   mcgroup = parser.add_mutually_exclusive_group()
 
@@ -676,6 +679,9 @@ if __name__ == "__main__":
 
   if args.gsheet:
     mcli.gsheet = True
+
+  if args.showttps:
+    mcli.showttps = True
 
   if args.update:
     mcli.update()
