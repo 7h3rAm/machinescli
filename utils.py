@@ -227,6 +227,8 @@ def to_emoji(text):
     return red("")
   elif "access_user" == text.lower():
     return yellow("")
+  elif "has_writeup" == text.lower():
+    return yellow("")
   elif "android" in text.lower():
     return green("")
   elif "arm" in text.lower():
@@ -298,6 +300,8 @@ def get_table(header, rows, delim="___", aligndict=None, markdown=False, colalig
       table.align["OS"] = "c"
       table.align["OSCPlike"] = "c"
       table.align["Owned"] = "c"
+      table.align["Writeup"] = "c"
+      table.align["TTPs"] = "c"
     table.vertical_char = " "
     table.horizontal_char = "-"
     table.junction_char = " "
@@ -341,64 +345,21 @@ def show_machines(data, sort_key="name", jsonify=False, gsheet=False, showttps=F
   else:
     rows = []
     if "writeuppdfurl" in data[0]:
-      header = ["#", "ID", "Name", "Rating", "Difficulty", "OS", "OSCPlike", "Owned", "TTPs"] if showttps else ["#", "ID", "Name", "Rating", "Difficulty", "OS", "OSCPlike", "Owned"]
+      header = ["#", "ID", "Name", "Rating", "Difficulty", "OS", "OSCPlike", "Owned", "Writeup", "TTPs"] if showttps else ["#", "ID", "Name", "Rating", "Difficulty", "OS", "OSCPlike", "Owned", "Writeup"]
       for idx, entry in enumerate(sorted(data, key=lambda k: k[sort_key].lower())):
         mid = "%s%s" % (blue("%s#" % (entry["verbose_id"].split("#")[0])), blue_bold("%s" % (entry["verbose_id"].split("#")[1])))
         name = black_bold(trim(entry["name"], maxq=30))
         os = to_emoji(entry["os"])
         difficulty = entry["difficulty"] if entry.get("difficulty") and entry["difficulty"] else "difficulty_unknown"
         rating = to_color_difficulty(sparkify(entry["difficulty_ratings"])) if entry.get("difficulty_ratings") else ""
+        oscplike = "oscplike" if entry.get("oscplike") and entry["oscplike"] else "notoscplike"
         if entry.get("owned_root") and entry["owned_root"]:
           owned = "access_root"
         elif entry.get("owned_user") and entry["owned_user"]:
           owned = "access_user"
         else:
           owned = "access_none"
-        oscplike = "oscplike" if entry.get("oscplike") and entry["oscplike"] else "notoscplike"
-        ttps = "\n".join([
-          "\n".join([green(x) for x in entry["writeups"]["7h3rAm"]["ttps"]["enumerate"]]),
-          "\n".join([yellow(x) for x in entry["writeups"]["7h3rAm"]["ttps"]["exploit"]]),
-          "\n".join([red(x) for x in entry["writeups"]["7h3rAm"]["ttps"]["privesc"]])
-          ]).strip() if entry.get("writeups") and entry["writeups"].get("7h3rAm") else ""
-        if showttps:
-          rows.append("%s.___%s___%s___%s___%s___%s___%s___%s___%s" % (
-            idx+1,
-            mid,
-            name,
-            rating,
-            to_emoji(difficulty),
-            os,
-            to_emoji(oscplike),
-            to_emoji(owned),
-            ttps,
-          ))
-        else:
-          rows.append("%s.___%s___%s___%s___%s___%s___%s___%s" % (
-            idx+1,
-            mid,
-            name,
-            rating,
-            to_emoji(difficulty),
-            os,
-            to_emoji(oscplike),
-            to_emoji(owned),
-          ))
-
-    elif "expires_at" in data[0]:
-      header = ["#", "ID", "Name", "Expires", "Rating", "Difficulty", "OS", "OSCPlike", "Owned", "TTPs"] if showttps else ["#", "ID", "Name", "Expires", "Rating", "Difficulty", "OS", "OSCPlike", "Owned"]
-      for idx, entry in enumerate(sorted(data, key=lambda k: k[sort_key].lower())):
-        mid = "%s%s" % (blue("%s#" % (entry["verbose_id"].split("#")[0])), blue_bold("%s" % (entry["verbose_id"].split("#")[1])))
-        name = black_bold(trim(entry["name"], maxq=30))
-        os = to_emoji(entry["os"])
-        difficulty = entry["difficulty"] if entry.get("difficulty") and entry["difficulty"] else "difficulty_unknown"
-        rating = to_color_difficulty(sparkify(entry["difficulty_ratings"])) if entry.get("difficulty_ratings") else ""
-        if entry.get("owned_root") and entry["owned_root"]:
-          owned = "access_root"
-        elif entry.get("owned_user") and entry["owned_user"]:
-          owned = "access_user"
-        else:
-          owned = "access_none"
-        oscplike = "oscplike" if entry.get("oscplike") and entry["oscplike"] else "notoscplike"
+        writeup = to_emoji("has_writeup") if entry.get("writeups") and entry["writeups"].get("7h3rAm") else ""
         ttps = "\n".join([
           "\n".join([green(x) for x in entry["writeups"]["7h3rAm"]["ttps"]["enumerate"]]),
           "\n".join([yellow(x) for x in entry["writeups"]["7h3rAm"]["ttps"]["exploit"]]),
@@ -409,16 +370,50 @@ def show_machines(data, sort_key="name", jsonify=False, gsheet=False, showttps=F
             idx+1,
             mid,
             name,
-            entry["expires_at"],
             rating,
             to_emoji(difficulty),
             os,
             to_emoji(oscplike),
             to_emoji(owned),
+            writeup,
             ttps,
           ))
         else:
           rows.append("%s.___%s___%s___%s___%s___%s___%s___%s___%s" % (
+            idx+1,
+            mid,
+            name,
+            rating,
+            to_emoji(difficulty),
+            os,
+            to_emoji(oscplike),
+            to_emoji(owned),
+            writeup,
+          ))
+
+    elif "expires_at" in data[0]:
+      header = ["#", "ID", "Name", "Expires", "Rating", "Difficulty", "OS", "OSCPlike", "Owned", "Writeup", "TTPs"] if showttps else ["#", "ID", "Name", "Expires", "Rating", "Difficulty", "OS", "OSCPlike", "Owned", "Writeup"]
+      for idx, entry in enumerate(sorted(data, key=lambda k: k[sort_key].lower())):
+        mid = "%s%s" % (blue("%s#" % (entry["verbose_id"].split("#")[0])), blue_bold("%s" % (entry["verbose_id"].split("#")[1])))
+        name = black_bold(trim(entry["name"], maxq=30))
+        os = to_emoji(entry["os"])
+        difficulty = entry["difficulty"] if entry.get("difficulty") and entry["difficulty"] else "difficulty_unknown"
+        rating = to_color_difficulty(sparkify(entry["difficulty_ratings"])) if entry.get("difficulty_ratings") else ""
+        oscplike = "oscplike" if entry.get("oscplike") and entry["oscplike"] else "notoscplike"
+        if entry.get("owned_root") and entry["owned_root"]:
+          owned = "access_root"
+        elif entry.get("owned_user") and entry["owned_user"]:
+          owned = "access_user"
+        else:
+          owned = "access_none"
+        writeup = to_emoji("has_writeup") if entry.get("writeups") and entry["writeups"].get("7h3rAm") else ""
+        ttps = "\n".join([
+          "\n".join([green(x) for x in entry["writeups"]["7h3rAm"]["ttps"]["enumerate"]]),
+          "\n".join([yellow(x) for x in entry["writeups"]["7h3rAm"]["ttps"]["exploit"]]),
+          "\n".join([red(x) for x in entry["writeups"]["7h3rAm"]["ttps"]["privesc"]])
+          ]).strip() if entry.get("writeups") and entry["writeups"].get("7h3rAm") else ""
+        if showttps:
+          rows.append("%s.___%s___%s___%s___%s___%s___%s___%s___%s___%s___%s" % (
             idx+1,
             mid,
             name,
@@ -428,10 +423,25 @@ def show_machines(data, sort_key="name", jsonify=False, gsheet=False, showttps=F
             os,
             to_emoji(oscplike),
             to_emoji(owned),
+            writeup,
+            ttps,
+          ))
+        else:
+          rows.append("%s.___%s___%s___%s___%s___%s___%s___%s___%s___%s" % (
+            idx+1,
+            mid,
+            name,
+            entry["expires_at"],
+            rating,
+            to_emoji(difficulty),
+            os,
+            to_emoji(oscplike),
+            to_emoji(owned),
+            writeup,
           ))
 
     elif "search_url" in data[0]:
-      header = ["#", "ID", "Name", "Follow", "Rating", "Difficulty", "OS", "OSCPlike", "Owned", "TTPs"] if showttps else ["#", "ID", "Name", "Follow", "Rating", "Difficulty", "OS", "OSCPlike", "Owned"]
+      header = ["#", "ID", "Name", "Follow", "Rating", "Difficulty", "OS", "OSCPlike", "Owned", "Writeup", "TTPs"] if showttps else ["#", "ID", "Name", "Follow", "Rating", "Difficulty", "OS", "OSCPlike", "Owned", "Writeup"]
       for idx, entry in enumerate(sorted(data, key=lambda k: k[sort_key].lower())):
         mid = "%s%s" % (blue("%s#" % (entry["verbose_id"].split("#")[0])), blue_bold("%s" % (entry["verbose_id"].split("#")[1])))
         name = black_bold(trim(entry["name"], maxq=30))
@@ -443,19 +453,34 @@ def show_machines(data, sort_key="name", jsonify=False, gsheet=False, showttps=F
         os = to_emoji(entry["os"])
         difficulty = entry["difficulty"] if entry.get("difficulty") and entry["difficulty"] else "difficulty_unknown"
         rating = to_color_difficulty(sparkify(entry["difficulty_ratings"])) if entry.get("difficulty_ratings") else ""
+        oscplike = "oscplike" if entry.get("oscplike") and entry["oscplike"] else "notoscplike"
         if entry.get("owned_root") and entry["owned_root"]:
           owned = "access_root"
         elif entry.get("owned_user") and entry["owned_user"]:
           owned = "access_user"
         else:
           owned = "access_none"
-        oscplike = "oscplike" if entry.get("oscplike") and entry["oscplike"] else "notoscplike"
+        writeup = to_emoji("has_writeup") if entry.get("writeups") and entry["writeups"].get("7h3rAm") else ""
         ttps = "\n".join([
           "\n".join([green(x) for x in entry["writeups"]["7h3rAm"]["ttps"]["enumerate"]]),
           "\n".join([yellow(x) for x in entry["writeups"]["7h3rAm"]["ttps"]["exploit"]]),
           "\n".join([red(x) for x in entry["writeups"]["7h3rAm"]["ttps"]["privesc"]])
           ]).strip() if entry.get("writeups") and entry["writeups"].get("7h3rAm") else ""
         if showttps:
+          rows.append("%s.___%s___%s___%s___%s___%s___%s___%s___%s___%s___%s" % (
+            idx+1,
+            mid,
+            name,
+            follow,
+            rating,
+            to_emoji(difficulty),
+            os,
+            to_emoji(oscplike),
+            to_emoji(owned),
+            writeup,
+            ttps,
+          ))
+        else:
           rows.append("%s.___%s___%s___%s___%s___%s___%s___%s___%s___%s" % (
             idx+1,
             mid,
@@ -466,42 +491,44 @@ def show_machines(data, sort_key="name", jsonify=False, gsheet=False, showttps=F
             os,
             to_emoji(oscplike),
             to_emoji(owned),
-            ttps,
-          ))
-        else:
-          rows.append("%s.___%s___%s___%s___%s___%s___%s___%s___%s" % (
-            idx+1,
-            mid,
-            name,
-            follow,
-            rating,
-            to_emoji(difficulty),
-            os,
-            to_emoji(oscplike),
-            to_emoji(owned),
+            writeup,
           ))
 
     else:
-      header = ["#", "ID", "Name", "Rating", "Difficulty", "OS", "OSCPlike", "Owned", "TTPs"] if showttps else ["#", "ID", "Name", "Rating", "Difficulty", "OS", "OSCPlike", "Owned"]
+      header = ["#", "ID", "Name", "Rating", "Difficulty", "OS", "OSCPlike", "Owned", "Writeup", "TTPs"] if showttps else ["#", "ID", "Name", "Rating", "Difficulty", "OS", "OSCPlike", "Owned", "Writeup"]
       for idx, entry in enumerate(sorted(data, key=lambda k: k[sort_key].lower())):
         mid = "%s%s" % (blue("%s#" % (entry["verbose_id"].split("#")[0])), blue_bold("%s" % (entry["verbose_id"].split("#")[1])))
         name = black_bold(trim(entry["name"], maxq=30))
         os = to_emoji(entry["os"])
         difficulty = entry["difficulty"] if entry.get("difficulty") and entry["difficulty"] else "difficulty_unknown"
         rating = to_color_difficulty(sparkify(entry["difficulty_ratings"])) if entry.get("difficulty_ratings") else ""
+        oscplike = "oscplike" if entry.get("oscplike") and entry["oscplike"] else "notoscplike"
         if entry.get("owned_root") and entry["owned_root"]:
           owned = "access_root"
         elif entry.get("owned_user") and entry["owned_user"]:
           owned = "access_user"
         else:
           owned = "access_none"
-        oscplike = "oscplike" if entry.get("oscplike") and entry["oscplike"] else "notoscplike"
+        writeup = to_emoji("has_writeup") if entry.get("writeups") and entry["writeups"].get("7h3rAm") else ""
         ttps = "\n".join([
           "\n".join([green(x) for x in entry["writeups"]["7h3rAm"]["ttps"]["enumerate"]]),
           "\n".join([yellow(x) for x in entry["writeups"]["7h3rAm"]["ttps"]["exploit"]]),
           "\n".join([red(x) for x in entry["writeups"]["7h3rAm"]["ttps"]["privesc"]])
           ]).strip() if entry.get("writeups") and entry["writeups"].get("7h3rAm") else ""
         if showttps:
+          rows.append("%s.___%s___%s___%s___%s___%s___%s___%s___%s___%s" % (
+            idx+1,
+            mid,
+            name,
+            rating,
+            to_emoji(difficulty),
+            os,
+            to_emoji(oscplike),
+            to_emoji(owned),
+            writeup,
+            ttps,
+          ))
+        else:
           rows.append("%s.___%s___%s___%s___%s___%s___%s___%s___%s" % (
             idx+1,
             mid,
@@ -511,18 +538,7 @@ def show_machines(data, sort_key="name", jsonify=False, gsheet=False, showttps=F
             os,
             to_emoji(oscplike),
             to_emoji(owned),
-            ttps,
-          ))
-        else:
-          rows.append("%s.___%s___%s___%s___%s___%s___%s___%s" % (
-            idx+1,
-            mid,
-            name,
-            rating,
-            to_emoji(difficulty),
-            os,
-            to_emoji(oscplike),
-            to_emoji(owned),
+            writeup,
           ))
 
     to_table(header=header, rows=rows, delim="___", aligndict=None, markdown=False)
