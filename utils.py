@@ -218,11 +218,11 @@ def to_emoji(text):
   text = str(text)
   # https://github.com/ikatyang/emoji-cheat-sheet
   if "private" == text.lower():
-    return red("")
+    return red("") # 
   elif "public" == text.lower():
     return green("")
   elif "oscplike" == text.lower():
-    return magenta("")
+    return magenta("") # 
   elif "access_root" == text.lower():
     return red("")
   elif "access_user" == text.lower():
