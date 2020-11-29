@@ -32,6 +32,9 @@ This tool provides commandline access for [HackTheBox](https://www.hackthebox.eu
 1. Query `owned AND oscplike HackTheBox` machines using the built-in filter:
 ![Query-OwnedHTB](machinescli06.png)
 
+1. Query `owned AND oscplike HackTheBox` machines using the built-in filter and show TTPs if machine writeups are available:
+![Query-OwnedHTB](machinescli06a.png)
+
 1. Query `owned AND NOT OSCPlike` machines using `jq`-style syntax:
 ![QueryJQ](machinescli07.png)
 
