@@ -323,7 +323,13 @@ class MachinesCLI:
             name, mid, url = match.groups()[0], int(match.groups()[1]), "https://www.vulnhub.com/entry/%s,%s/" % (match.groups()[0], match.groups()[1])
             vhoscplike.append(token)
       self.oscplikelist += vhoscplike
-    self._save_oscplike()
+      self._save_oscplike()
+    for machine in self.stats["machines"]:
+      if machine["url"] in self.oscplikelist:
+        machine["oscplike"] = True
+      else:
+        machine["oscplike"] = False
+    self._save_stats()
     utils.info("[update.oscplike] added %d oscplike machines from various sources" % (len(self.oscplikelist)))
 
   def _update_owned(self):
