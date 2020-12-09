@@ -32,6 +32,11 @@ class MachinesCLI:
 
     self.statsfile = "%s/toolbox/bootstrap/machines.json" % (utils.expand_env(var="$HOME"))
     self.stats = utils.load_json(self.statsfile)
+    if not self.stats:
+      self.stats = {
+        "counts": {},
+        "machines": [],
+      }
 
     self.queries = {
       "all": '.machines[]',

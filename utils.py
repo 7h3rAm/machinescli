@@ -4,6 +4,7 @@ import json
 import yaml
 import codecs
 import urllib.request
+from pathlib import Path
 
 import requests
 import sparkline
@@ -106,8 +107,10 @@ def download_json(url):
     return json.loads(url.read().decode())
 
 def load_json(filename):
-  with open(filename) as fp:
-    return json.load(fp)
+  fileobj = Path(filename)
+  if fileobj.is_file():
+    with open(filename) as fp:
+      return json.load(fp)
 
 def save_json(datadict, filename):
   with open(filename, "w", encoding="utf-8") as fp:
@@ -115,8 +118,10 @@ def save_json(datadict, filename):
 
 def load_file(filename):
   lines = []
-  with open(filename) as fp:
-    lines = sorted(list(set(list(list(filter(None, fp.read().split("\n")))))))
+  fileobj = Path(filename)
+  if fileobj.is_file():
+    with open(filename) as fp:
+      lines = sorted(list(set(list(list(filter(None, fp.read().split("\n")))))))
   return lines
 
 def save_file(datalist, filename):
@@ -125,7 +130,9 @@ def save_file(datalist, filename):
     fp.write("\n")
 
 def load_yaml(filename):
-  return yaml.safe_load(open(filename))
+  fileobj = Path(filename)
+  if fileobj.is_file():
+    return yaml.safe_load(open(filename))
 
 def save_yaml(datayml, filename):
   with open(filename, "w") as fp:
