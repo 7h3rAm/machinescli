@@ -23,7 +23,7 @@ This tool provides commandline access for [HackTheBox](https://www.hackthebox.eu
 1. Show stats for machine named `bashed`, show extended details as JSON, export results for GSheet import:
 ![Info](machinescli03.png)
 
-1. Search machine descriptions for keywords `buffer overflow`, `sqli` and `bash`. Export results for GSheet import:
+1. Search machine descriptions for keywords `buffer overflow` and `bash`:
 ![Search](machinescli04.png)
 
 1. Query `owned` machines using the built-in filter:
