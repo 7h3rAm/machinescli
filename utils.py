@@ -273,7 +273,7 @@ def to_markdown_table(pt):
   pt.junction_char = _junc
   return "\n".join(markdown)
 
-def get_table(header, rows, delim="___", aligndict=None, markdown=False, colalign=None):
+def get_table(header, rows, delim="___", aligndict=None, markdown=False, colalign=None, multiline=False):
   table = prettytable.PrettyTable()
   table.field_names = header
   table.align = "c"; table.valign = "m"
@@ -312,10 +312,11 @@ def get_table(header, rows, delim="___", aligndict=None, markdown=False, colalig
     table.vertical_char = " "
     table.horizontal_char = "-"
     table.junction_char = " "
-    return table.get_string()
+    table.hrules = prettytable.ALL if multiline else prettytable.FRAME
+    return "\n%s\n" % (table.get_string())
 
-def to_table(header, rows, delim="___", aligndict=None, markdown=False):
-  print(get_table(header, rows, delim=delim, aligndict=aligndict, markdown=markdown))
+def to_table(header, rows, delim="___", aligndict=None, markdown=False, multiline=False):
+  print(get_table(header, rows, delim=delim, aligndict=aligndict, markdown=markdown, multiline=multiline))
 
 def to_json(data):
   print(json.dumps(data, indent=2, sort_keys=True))
@@ -368,9 +369,9 @@ def show_machines(data, sort_key="name", jsonify=False, gsheet=False, showttps=F
           owned = "access_none"
         writeup = to_emoji("has_writeup") if entry.get("writeups") and entry["writeups"].get("7h3rAm") else ""
         ttps = "\n".join([
-          "\n".join([green(x) for x in entry["writeups"]["7h3rAm"]["ttps"]["enumerate"]]),
-          "\n".join([yellow(x) for x in entry["writeups"]["7h3rAm"]["ttps"]["exploit"]]),
-          "\n".join([red(x) for x in entry["writeups"]["7h3rAm"]["ttps"]["privesc"]])
+          ",".join([green(x) for x in entry["writeups"]["7h3rAm"]["ttps"]["enumerate"]]),
+          ",".join([yellow(x) for x in entry["writeups"]["7h3rAm"]["ttps"]["exploit"]]),
+          ",".join([red(x) for x in entry["writeups"]["7h3rAm"]["ttps"]["privesc"]])
           ]).strip() if entry.get("writeups") and entry["writeups"].get("7h3rAm") else ""
         if showttps:
           rows.append("%s.___%s___%s___%s___%s___%s___%s___%s___%s___%s___%s" % (
@@ -422,9 +423,9 @@ def show_machines(data, sort_key="name", jsonify=False, gsheet=False, showttps=F
           owned = "access_none"
         writeup = to_emoji("has_writeup") if entry.get("writeups") and entry["writeups"].get("7h3rAm") else ""
         ttps = "\n".join([
-          "\n".join([green(x) for x in entry["writeups"]["7h3rAm"]["ttps"]["enumerate"]]),
-          "\n".join([yellow(x) for x in entry["writeups"]["7h3rAm"]["ttps"]["exploit"]]),
-          "\n".join([red(x) for x in entry["writeups"]["7h3rAm"]["ttps"]["privesc"]])
+          ",".join([green(x) for x in entry["writeups"]["7h3rAm"]["ttps"]["enumerate"]]),
+          ",".join([yellow(x) for x in entry["writeups"]["7h3rAm"]["ttps"]["exploit"]]),
+          ",".join([red(x) for x in entry["writeups"]["7h3rAm"]["ttps"]["privesc"]])
           ]).strip() if entry.get("writeups") and entry["writeups"].get("7h3rAm") else ""
         if showttps:
           rows.append("%s.___%s___%s___%s___%s___%s___%s___%s___%s___%s___%s" % (
@@ -471,9 +472,9 @@ def show_machines(data, sort_key="name", jsonify=False, gsheet=False, showttps=F
           owned = "access_none"
         writeup = to_emoji("has_writeup") if entry.get("writeups") and entry["writeups"].get("7h3rAm") else ""
         ttps = "\n".join([
-          "\n".join([green(x) for x in entry["writeups"]["7h3rAm"]["ttps"]["enumerate"]]),
-          "\n".join([yellow(x) for x in entry["writeups"]["7h3rAm"]["ttps"]["exploit"]]),
-          "\n".join([red(x) for x in entry["writeups"]["7h3rAm"]["ttps"]["privesc"]])
+          ",".join([green(x) for x in entry["writeups"]["7h3rAm"]["ttps"]["enumerate"]]),
+          ",".join([yellow(x) for x in entry["writeups"]["7h3rAm"]["ttps"]["exploit"]]),
+          ",".join([red(x) for x in entry["writeups"]["7h3rAm"]["ttps"]["privesc"]])
           ]).strip() if entry.get("writeups") and entry["writeups"].get("7h3rAm") else ""
         if showttps:
           rows.append("%s.___%s___%s___%s___%s___%s___%s___%s___%s___%s" % (
@@ -501,4 +502,4 @@ def show_machines(data, sort_key="name", jsonify=False, gsheet=False, showttps=F
             writeup,
           ))
 
-    to_table(header=header, rows=rows, delim="___", aligndict=None, markdown=False)
+    to_table(header=header, rows=rows, delim="___", aligndict=None, markdown=False, multiline=False)
