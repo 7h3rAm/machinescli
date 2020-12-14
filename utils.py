@@ -29,7 +29,7 @@ def highlight(text, color="black", bold=False):
     colorcode = "\x1b[0;34m" if not bold else "\x1b[1;34m"
   elif color == "magenta":
     colorcode = "\x1b[0;35m" if not bold else "\x1b[1;35m"
-  elif color == "cyan":
+  elif color == "orange":
     colorcode = "\x1b[0;36m" if not bold else "\x1b[1;36m"
   else:
     colorcode = "\x1b[0;30m" if not bold else "\x1b[1;30m"
@@ -77,11 +77,11 @@ def magenta(text):
 def magenta_bold(text):
   return highlight(text, color="magenta", bold=True)
 
-def cyan(text):
-  return highlight(text, color="cyan", bold=False)
+def orange(text):
+  return highlight(text, color="orange", bold=False)
 
-def cyan_bold(text):
-  return highlight(text, color="cyan", bold=True)
+def orange_bold(text):
+  return highlight(text, color="orange", bold=True)
 
 def debug(text):
   print("%s %s" % (blue_bold("[*]"), text))
@@ -229,11 +229,11 @@ def to_emoji(text):
   elif "public" == text.lower():
     return green("")
   elif "oscplike" == text.lower():
-    return magenta("") # 
+    return magenta("")
   elif "access_root" == text.lower():
     return red("")
   elif "access_user" == text.lower():
-    return yellow("")
+    return orange("")
   elif "has_writeup" == text.lower():
     return yellow("")
   elif "android" in text.lower():
@@ -243,7 +243,7 @@ def to_emoji(text):
   elif "bsd" in text.lower():
     return red("")
   elif "linux" == text.lower():
-    return yellow_bold("")
+    return orange("")
   elif "solaris" in text.lower():
     return magenta_bold("")
   elif "unix" in text.lower():
@@ -255,13 +255,13 @@ def to_emoji(text):
   elif "difficulty_unknown" == text.lower():
     return ""
   elif "easy" == text.lower():
-    return cyan_bold("")
+    return green("")
   elif "medium" == text.lower():
-    return green_bold("")
+    return yellow("")
   elif "hard" == text.lower():
-    return yellow_bold("")
+    return orange("")
   elif "insane" == text.lower():
-    return red_bold("")
+    return red("")
   else:
     return ""
 
