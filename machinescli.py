@@ -639,7 +639,7 @@ class MachinesCLI:
 
 
 if __name__ == "__main__":
-  parser = argparse.ArgumentParser(description="%s (v%s): Command-line interface for %s, %s and %s machines." % (utils.blue_bold("machinescli"), utils.green_bold("0.1"), utils.magenta_bold("HackTheBox"), utils.orange_bold("TryHackMe"), utils.yellow_bold("VulnHub")))
+  parser = argparse.ArgumentParser(description="%s (v%s): Command-line interface for %s, %s and %s machines." % (utils.blue_bold("machinescli"), utils.green_bold("0.1"), utils.magenta_bold("HackTheBox"), utils.cyan_bold("TryHackMe"), utils.yellow_bold("VulnHub")))
 
   # global flag to switch output mode; useful for debugging with jq
   ggroup = parser.add_mutually_exclusive_group()
