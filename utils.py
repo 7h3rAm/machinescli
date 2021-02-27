@@ -255,7 +255,7 @@ def to_emoji(text):
   elif "difficulty_unknown" == text.lower():
     return ""
   elif "easy" == text.lower():
-    return cyan("")
+    return white("")
   elif "medium" == text.lower():
     return green("")
   elif "hard" == text.lower():
