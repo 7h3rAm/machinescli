@@ -26,7 +26,7 @@ class TryHackMe:
 
   def rooms(self): ## get details for all walkthroughs and challenges
     # curl -s "https://tryhackme.com/api/hacktivities" | jq
-    return self._get_http(endpoint="/hacktivities")
+    return self._get_http(endpoint="/hacktivities?limit=1000")
 
   def room_details(self, room, verbose=False):
     # curl -s "https://tryhackme.com/api/room/vulnversity" | jq

@@ -95,6 +95,7 @@ class MachinesCLI:
     self.htbcsvfile = "/tmp/oscplike.htb.csv"
 
     self.points2difficulty = {
+      5: "info",
       10: "warmup",
       20: "easy",
       30: "medium",
@@ -414,7 +415,7 @@ class MachinesCLI:
       utils.info("[update.vulnhub] added %d new machines (total: %d)" % (len(deltavh), len(self._json_query('.machines[] | select(.infrastructure == "vulnhub") | .url'))))
 
   def _update_tryhackme(self):
-    rooms = self.thmapi.rooms()
+    rooms = self.thmapi.rooms()["rooms"]
     thmrooms = {}
     for room in rooms:
       url = "https://tryhackme.com/room/%s" % (room["code"])
@@ -445,7 +446,7 @@ class MachinesCLI:
           "owned_root": False,
           "owned_user": False,
           "points": d2p[thmrooms[deltaurl]["difficulty"]],
-          "release": thmrooms[deltaurl]["published"],
+          "release": thmrooms[deltaurl]["published"] if "published" in thmrooms[deltaurl] else thmrooms[deltaurl]["created"],
           "series": {
             "id": None,
             "name": None,
