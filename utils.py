@@ -7,7 +7,7 @@ import urllib.request
 from pathlib import Path
 
 import requests
-import sparkline
+import sparklines
 import prettytable
 from bs4 import BeautifulSoup
 

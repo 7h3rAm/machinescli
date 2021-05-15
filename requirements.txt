@@ -1,0 +1,7 @@
+sparklines
+jq
+pyyaml
+requests
+prettytable
+bs4
+lxml
