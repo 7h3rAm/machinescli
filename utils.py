@@ -5,6 +5,7 @@ import yaml
 import codecs
 import urllib.request
 from pathlib import Path
+from pprint import pprint
 
 import requests
 import sparkline
@@ -333,7 +334,7 @@ def to_gsheet(data):
       infra = "TryHackMe"
     else:
       infra = "Misc"
-    os = item["os"].title()
+    os = item["os"].title() if item["os"] else ""
     points = item["points"] if item["points"] else ""
     owned = "Yes" if item["owned_user"] or item["owned_root"] else "No"
     lines.append("%s,%s,%s,%s,%s," % (name, infra, os, points, owned))
