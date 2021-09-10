@@ -1,5 +1,39 @@
 #!/usr/bin/env python3
 
+'''
+https://github.com/mxrch/htb_api
+  curl -s 'https://www.hackthebox.eu/api/vpnserver/status/all' -H 'Authorization: Bearer <apikey>' | jq .
+  curl -s 'https://www.hackthebox.eu/vendor/d3/world-50m.v1.json' | jq .
+  curl -s 'https://www.hackthebox.eu/storage/current.png'
+  curl -s 'https://www.hackthebox.eu/api/startingpoint/machines' -H 'Authorization: Bearer <apikey>' | jq .
+  curl -s 'https://www.hackthebox.eu/api/startingpoint/owns' -H 'Authorization: Bearer <apikey>' | jq .
+  curl -s 'https://www.hackthebox.eu/api/users/htb/connection/status' -H 'Authorization: Bearer <apikey>' --data '' | jq .
+  curl -s 'https://www.hackthebox.eu/api/users/htb/fortress/connection/status' -H 'Authorization: Bearer <apikey>' --data '' | jq .
+  curl -s 'https://www.hackthebox.eu/api/users/htb/endgame/connection/status' -H 'Authorization: Bearer <apikey>' --data '' | jq .
+
+
+https://github.com/Propolisa/htb-api-docs/blob/c6e40a43b6ce86917c3e8ec38d6387c53364a453/_posts/HTB%20Endpoint%20Map.md
+  curl -s 'https://www.hackthebox.eu/api/v4/challenge/categories/list' | jq .
+  curl -s 'https://www.hackthebox.eu/api/v4/challenge/todo' | jq .
+  curl -s 'https://www.hackthebox.eu/api/v4/machine/active' | jq .
+  curl -s 'https://www.hackthebox.eu/api/v4/machine/todo' | jq .
+  curl -s 'https://www.hackthebox.eu/api/v4/user/anonymized/id' | jq .
+  curl -s 'https://www.hackthebox.eu/api/v4/user/connection/status' | jq .
+  curl -s 'https://www.hackthebox.eu/api/v4/user/info' | jq .
+  curl -s 'https://www.hackthebox.eu/api/v4/user/profile/activity/9001' | jq .
+  curl -s 'https://www.hackthebox.eu/api/v4/user/profile/basic/9001' | jq .
+  curl -s 'https://www.hackthebox.eu/api/v4/user/profile/bloods/9001' | jq .
+  curl -s 'https://www.hackthebox.eu/api/v4/user/profile/chart/machines/attack/9001' | jq .
+  curl -s 'https://www.hackthebox.eu/api/v4/user/profile/content/9001' | jq .
+  curl -s 'https://www.hackthebox.eu/api/v4/user/profile/graph/1W/9001' | jq .
+  curl -s 'https://www.hackthebox.eu/api/v4/user/profile/graph/1Y/9001' | jq .
+  curl -s 'https://www.hackthebox.eu/api/v4/user/profile/progress/challenges/9001' | jq .
+  curl -s 'https://www.hackthebox.eu/api/v4/user/profile/progress/endgame/9001' | jq .
+  curl -s 'https://www.hackthebox.eu/api/v4/user/profile/progress/fortress/9001' | jq .
+  curl -s 'https://www.hackthebox.eu/api/v4/user/profile/progress/machines/os/9001' | jq .
+  curl -s 'https://www.hackthebox.eu/api/v4/user/profile/progress/prolab/9001' | jq .
+'''
+
 import utils
 
 
@@ -36,6 +70,10 @@ class HackTheBox:
   def stats_daily_owns(self, mid):
     # curl -s 'https://www.hackthebox.eu/api/stats/daily/owns/1' --data '' | jq .
     return self._post_http(endpoint="/stats/daily/owns/%d" % (mid), data={}, authorize=False)
+
+  def machines_startingpoint_all(self):
+    # curl -s 'https://www.hackthebox.eu/api/startingpoint/machines' -H 'Authorization: Bearer <apikey>' | jq .
+    return self._get_http(endpoint="/startingpoint/machines", authorize=True)
 
   def machines_get_matrix(self, mid):
     # curl -s 'https://www.hackthebox.eu/api/machines/get/matrix/1' -H 'Authorization: Bearer <apikey>' | jq .

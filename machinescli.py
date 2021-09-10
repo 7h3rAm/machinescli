@@ -95,6 +95,7 @@ class MachinesCLI:
     self.htbcsvfile = "/tmp/oscplike.htb.csv"
 
     self.points2difficulty = {
+      0: "startingpoint",
       5: "info",
       10: "warmup",
       20: "easy",
@@ -315,7 +316,6 @@ class MachinesCLI:
           if token and token != "":
             token = token.lower().replace(" [linux]", "").replace(" [windows]", "").strip()
             token = self.corrections[token] if token in self.corrections else token
-  
             # token is a name, find url from self.stats
             query = '.machines[] | select(.infrastructure == "hackthebox" and .shortname == "%s") | .url' % (token)
             result = self._json_query(query)
@@ -359,10 +359,11 @@ class MachinesCLI:
 
   def _update_hackthebox(self):
     difficulty = self.htbapi.machines_difficulty()
-    machines = self.htbapi.machines_get_all()
+    machines = self.htbapi.machines_startingpoint_all()
+    machines += self.htbapi.machines_get_all()
     htbmachines = {}
     for machine in machines:
-      url = "https://www.hackthebox.eu/home/machines/profile/%d" % (machine["id"])
+      url = "https://app.hackthebox.eu/machines/%d" % (machine["id"])
       htbmachines[url] = machine
     trackedhtb = self._json_query('.machines[] | select(.infrastructure == "hackthebox") | .url')
     totalhtb = htbmachines.keys()
@@ -373,13 +374,20 @@ class MachinesCLI:
       for idx, deltaurl in enumerate(deltahtb):
         print("[update.hackthebox][%d/%d] adding stats for %s" % (idx+1, total, deltaurl))
         matchdict = htbmachines[deltaurl]
-        del matchdict["avatar_thumb"]
+        if "avatar_thumb" in matchdict:
+          matchdict["matrix"] = self.htbapi.machines_get_matrix(matchdict["id"]); del matchdict["matrix"]["success"]
+          del matchdict["avatar_thumb"]
+        else:
+          matchdict["points"] = 0
+          matchdict["matrix"] = {
+            "aggregate": [],
+            "maker": []
+          }
         matchdict["infrastructure"] = "hackthebox"
         matchdict["verbose_id"] = "hackthebox#%d" % (matchdict["id"])
         matchdict["difficulty"] = self.points2difficulty[matchdict["points"]]
         matchdict["shortname"] = matchdict["name"].lower().strip()
-        matchdict["matrix"] = self.htbapi.machines_get_matrix(matchdict["id"]); del matchdict["matrix"]["success"]
-        matchdict["url"] = "https://www.hackthebox.eu/home/machines/profile/%d" % (matchdict["id"])
+        matchdict["url"] = "https://app.hackthebox.eu/machines/%d" % (matchdict["id"])
         matchdict["difficulty_ratings"] = None
         for entry in difficulty:
           if entry["id"] == matchdict["id"]:
