@@ -1,4 +1,4 @@
-sparklines
+pysparklines
 jq
 pyyaml
 requests
