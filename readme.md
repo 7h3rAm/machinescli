@@ -13,6 +13,21 @@ This tool provides commandline access for [HackTheBox](https://www.hackthebox.eu
 > `machinescli` works in conjuction with [svachal](https://github.com/7h3rAm/svachal) framework.
 > As such, if you wish to extend and use writeup metadata, it will be natively accessible via the shared `machines.json` file.
 
+## Installation
+
+Follow the steps below and run `machinescli` to create the `machines.json` file (to get your `HTBAPIKEY` from [HackTheBox](https://www.hackthebox.com/home/settings), go to your username tab > Classic HTB > Settings > API Key):
+
+```
+$ mkdir -pv cd $HOME/toolbox/projects && cd $HOME/toolbox/projects
+$ git clone https://github.com/7h3rAm/machinescli && cd machinescli
+$ python3 -m venv --copies venv
+$ source venv/bin/activate
+$ pip install -r requirements.txt
+$ mkdir -pv $HOME/toolbox/bootstrap # this directory will be used to store and access machines.json file
+$ export HTBAPIKEY=<APIKEYHERE>
+$ python3 machinescli.py --update
+```
+
 ## Usage
 ![Usage](machinescli01.png)
 
@@ -51,9 +66,9 @@ This tool provides commandline access for [HackTheBox](https://www.hackthebox.eu
 ![THM-Stats](machinescli11.png)
 
 ## Argument Autocomplete
-Source the `.bash-completion` file within a shell to trigger auto-complete for arguments. This will require the following alias (change path as needed): 
+Source the `.bash-completion` file within a shell to trigger auto-complete for arguments. This will require the following alias:
 ```console
-alias machinescli='python3 $HOME/machinescli/machinescli.py'
+alias machinescli='python3 $HOME/toolbox/projects/machinescli/machinescli.py'
 ```
 
 > You will need a [Nerd Fonts patched font](https://github.com/ryanoasis/nerd-fonts/tree/master/patched-fonts) for OS icons and other symbols to be rendered correctly.
