@@ -15,7 +15,7 @@ from tryhackme import TryHackMe
 
 class MachinesCLI:
   def __init__(self):
-    self.htbapi = HackTheBox(utils.expand_env(var="$HTB_API_KEY"))
+    self.htbapi = HackTheBox(utils.expand_env(var="$HTBAPIKEY"))
     self.thmapi = TryHackMe()
     self.vhapi = VulnHub()
     self.jsonify = False
